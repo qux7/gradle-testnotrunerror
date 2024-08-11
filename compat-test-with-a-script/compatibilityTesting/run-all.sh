@@ -1,5 +1,18 @@
 #!/bin/bash
 
+if test -t 1 && command -v tput &>/dev/null
+then
+    red=`tput setaf 9`
+    green=`tput setaf 10`
+    yellow=`tput setaf 11`
+    normal=`tput sgr0`
+else
+    red=""
+    green=""
+    yellow=""
+    normal=""
+fi
+
 clean=clean
 build=build
 masterfile=master-source/TestNotRunErrorPluginFunctionalTest.groovy
@@ -8,7 +21,7 @@ linkedfilenew=plugin/$linkedfileold
 for f in *; do
     if [ -d "$f" ] && [ -f "$f/gradlew" ]; then
         # $f is a directory
-        echo $f
+        echo $yellow$f$normal
         # override path to use java11 instead of java13
         if [ -f "$f/substitutejava" ]; then
             overridepath="`cat $f/substitutejava`:"
@@ -22,7 +35,7 @@ for f in *; do
             linkedfile=$linkedfileold
         fi
         if ! cmp $masterfile $f/$linkedfile ; then
-            echo "cannot run compatibility test: symbolic link broken!"
+            echo $red"cannot run compatibility test: symbolic link broken!"$normal
             echo "link from: $f/$linkedfile"
             echo "link to: $masterfile"
             echo "Linux symbolic links may get broken after checking out the project on a Windows machine:"
@@ -35,9 +48,9 @@ for f in *; do
         PATH="$overridepath$PATH" ./gradlew $clean $build; rc=$?
         popd
         if [ $rc -eq 0 ]; then
-            echo "$f: success"
+            echo $green"$f: success"$normal
         else
-            echo "$f: failure !!!!"
+            echo $red"$f: failure !!!!"$normal
             break
         fi
     fi
