@@ -96,7 +96,9 @@ So we have two subdirectories, `build-with-gradle-6.2.1/` and `compat-test-with-
 The 3rd subdirectory, `compat-test-with-a-script/`, does compatibility testing without any plugin.
 It sort of does what `stutter` is for, but does not require one version of Gradle to run another Gradle,
 so that you can rule out a conflict between them. It is because of these tests that I concluded
-that `stutter` is not a problem, Groovy is.
+that the conflict between two i/o module versions happens because of Groovy, not `stutter`.
+
+On the other hand, `stutter` is not perfect either, it cannot test against Gradle version X.Y.0 if there is X.Y.1.
 
 In an ideal world, only one project would be needed.
 
