@@ -68,3 +68,35 @@ For example:
 ```
 ./gradlew clean build -Ptestnotrunerror.stopOnFailure=false -Ptestnotrunerror.checkClasses=true
 ```
+
+## About this repository
+
+### Linux symbolic links and Git
+
+When you see a file that contains a path to another file and nothing else, it's how Github displays symbolic
+links (symlinks), and what Git on Windows does with the symbolic links. Git on Linux has no problems with symlinks.
+If you are not going to modify the code, it is safe to replace a symbolic link by the file that it points to,
+provided that you can handle symlinks to symlinks.
+
+### Three projects?
+
+I compile the plugin with Gradle 6, but test it with Gradle 8.9.
+
+This is _not_ normal, the problem is that Groovy 2 cannot run code compiled with Groovy 3,
+but the code compiled with Groovy 2 runs on both Groovy 2 and Groovy 3.
+Gradle 8.9 uses Groovy 3.0.21, Gradle 5.0 uses Groovy 2.5.4 (while the latest stable Groovy version is 4.0.22).
+
+So I compile the plugin with Gradle 6.
+
+But to test the plugin for compatibility with various Gradle versions, I use the latest version
+of the `stutter` plugin, that requires the latest Gradle.
+
+So we have two subdirectories, `build-with-gradle-6.2.1/` and `compat-test-with-gradle-8.9/`.
+
+The 3rd subdirectory, `compat-test-with-a-script/`, does compatibility testing without any plugin.
+It sort of does what `stutter` is for, but does not require one version of Gradle to run another Gradle,
+so that you can rule out a conflict between them. It is because of these tests that I concluded
+that `stutter` is not a problem, Groovy is.
+
+In an ideal world, only one project would be needed.
+
