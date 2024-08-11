@@ -22,6 +22,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "integrationTest")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -49,6 +50,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "--tests", "BarTest")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -77,6 +79,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.buildAndFail()
@@ -111,6 +114,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -144,6 +148,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=false")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -177,6 +182,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "integrationTest", "-s", "-Ptestnotrunerror.enabled=false")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -210,6 +216,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "integrationTest", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -253,6 +260,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -291,6 +299,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "integrationTest", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -329,6 +338,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "integrationTest", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.buildAndFail()
@@ -371,6 +381,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "integrationTest", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.build()
@@ -412,6 +423,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
+        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
         runner.withArguments("clean", "test", "-s")
         runner.withProjectDir(projectDir)
         def result = runner.buildAndFail()

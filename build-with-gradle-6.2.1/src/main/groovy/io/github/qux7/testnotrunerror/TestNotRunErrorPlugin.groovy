@@ -8,6 +8,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GradleVersion
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,6 +30,7 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
 
     public void apply(Project project) {
         println(applyMessage)
+        println("Gradle version: " + GradleVersion.current().version + "; Groovy version: " + GroovySystem.version + "; Java version: " + System.getProperty("java.version"));
         def extension = project.extensions.create("testnotrunerror", TestNotRunErrorPluginExtension)
         NamedDomainObjectContainer<TestTaskExcludeClassNames> perTaskExcludes = project.container(TestTaskExcludeClassNames)
 //        perTaskExcludes.all {

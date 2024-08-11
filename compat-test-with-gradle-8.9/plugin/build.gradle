@@ -26,10 +26,6 @@ repositories {
     mavenCentral()
 }
 
-//dependencies {
-//    compatTestImplementation files('../../build-with-gradle-6.2.1/build/libs/testnotrunerror-0.1.0.jar')
-//}
-
 // !!stutter {{
 // otherwise: java.lang.UnsupportedClassVersionError: ... compiled by a more recent version of the Java Runtime ...
 java {
@@ -42,7 +38,7 @@ java {
 // for a real modern example, see stutter { ... } in https://github.com/ajoberstar/gradle-stutter/blob/main/build.gradle.kts
 stutter {
   // if true, only match min/max within that otherwise matches your compatibility specs in each Gradle major version
-  //sparse = false // defaults to true
+  sparse = false // defaults to true
 
   matrices {
     java11 {
@@ -50,9 +46,26 @@ stutter {
         languageVersion = JavaLanguageVersion.of(11)
       }
       gradleVersions {
-        compatibleRange '6.0', '6.9.3'
+        compatibleRange '5.0'
       }
     }
+    java17 {
+      javaToolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+      }
+      gradleVersions {
+        compatibleRange '7.2'
+      }
+    }
+    java21 {
+      javaToolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+      }
+      gradleVersions {
+        compatibleRange '8.3'
+      }
+    }
+
   }
 }
 // }} !!stutter
