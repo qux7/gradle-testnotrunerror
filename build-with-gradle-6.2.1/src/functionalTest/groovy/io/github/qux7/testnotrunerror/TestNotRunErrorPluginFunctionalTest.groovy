@@ -19,9 +19,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = createProjectWithout([]).projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "integrationTest")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -44,9 +44,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = createProjectWithout([]).projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "--tests", "BarTest")
-        def result = runner.build()
+                .build()
 
         then:
         !result.output.contains("running unitTestApp()")
@@ -70,9 +70,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = createProjectWithout(['//unitTestBar']).projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s")
-        def result = runner.buildAndFail()
+                .buildAndFail()
         println(THIS_BUILD_FAILURE_IS_OK)
 
         then:
@@ -102,9 +102,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
             }
         """.stripIndent()
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -133,9 +133,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
 //            }
 //        """.stripIndent()
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=false")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -164,9 +164,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
 //            }
 //        """.stripIndent()
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "integrationTest", "-s", "-Ptestnotrunerror.enabled=false")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -195,9 +195,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
             }
         """.stripIndent()
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "integrationTest", "-s")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -236,9 +236,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -272,9 +272,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "integrationTest", "-s")
-        def result = runner.build()
+                .build()
 
         then:
         !result.output.contains("running unitTestApp()")
@@ -308,9 +308,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "integrationTest", "-s")
-        def result = runner.buildAndFail()
+                .buildAndFail()
         println(THIS_BUILD_FAILURE_IS_OK)
 
         then:
@@ -348,9 +348,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "integrationTest", "-s")
-        def result = runner.build()
+                .build()
 
         then:
         result.output.contains("running unitTestApp()")
@@ -387,9 +387,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = createMyGradleRunner(projectDir)
+        def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s")
-        def result = runner.buildAndFail()
+                .buildAndFail()
         println(THIS_BUILD_FAILURE_IS_OK)
 
         then:
