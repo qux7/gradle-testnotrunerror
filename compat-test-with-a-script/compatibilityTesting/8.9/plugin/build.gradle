@@ -65,7 +65,3 @@ tasks.named('test') {
 
 project.tasks.withType(Test) { testLogging.showStandardStreams = true }
 
-// pass the task name to the tests
-tasks.withType(Test) {
-    systemProperty 'taskName', 'script'+name.capitalize()
-}

@@ -5,15 +5,18 @@ import spock.lang.Specification
 import org.gradle.testkit.runner.GradleRunner
 
 /**
- * A simple functional test for the 'io.github.qux7.testnotrunerror.greeting' plugin.
+ * Test the functionality of the 'io.github.qux7.testnotrunerror' plugin.
+ * This tests suite is used for both functional testing and compatibility testing, in the latter case
+ * this file is compiled and run by different versions of Gradle/Groovy/Java.
  */
-class TestNotRunErrorPluginFunctionalTest extends Specification {
+class TestNotRunErrorPluginFunctionalTest extends Specification implements PluginAccessConfig {
     static String classCheckErrorMessagePrefix = "Test classes are present but tests were not executed:"
     static String javaSourceCheckErrorMessagePrefix = "Java source files are present but tests were not executed:"
     static String testFilterDetected = "no error because --tests was specified on the command line"
     static String stopOnFailureDisabled = "no error because `testnotrunerror { stopOnFailure = false }` was specified"
     static String THIS_BUILD_FAILURE_IS_OK = "^^^^^ ^^^^^^ THIS BUILD WAS EXPECTED TO FAIL"
-    static String GROOVY_STRING = "" // to force GStringImpl, so that Groovy's stripIntent() is used, that ignores the length of the last blank line
+    /** Force GStringImpl: Groovy's stripIntent() ignores the length of the last blank line */
+    static String GROOVY_STRING = ""
 
     def "test project runs ok"() {
         given:
@@ -402,113 +405,44 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     }
 
     //=============== utils ==========================================
+    /**
+     * Create and configure a GradleRunner.
+     * All tests in this test suite require the same pre-configuration.
+     * @param projectDir project directory
+     * @return the created and pre-configured GradleRunner
+     */
     GradleRunner createMyGradleRunner(File projectDir) {
         def runner = GradleRunner.create()
                 .forwardOutput()
                 .withPluginClasspath()
                 .withProjectDir(projectDir)
-        if (System.getProperty('taskName')?.startsWith("compatTest")) {
-            runner.withGradleVersion(System.getProperty("compat.gradle.version"))
+        if (useGradleVersion) {
+            runner.withGradleVersion(useGradleVersion)
         }
         runner
     }
 
-    def somewhereAbove(String path) {
-        File res, cur = new File('..');
-        while (cur && !(res = new File(cur, path)).exists()) {
-            cur = cur.toPath().toAbsolutePath().normalize().toFile().parentFile
-        };
-        if (!cur) {
-            throw new IllegalArgumentException("'" + path + "' not found in ancestor directories")
-        };
-        //new File('.').relatvePath(res)
-        res
-    }
 
-    def getProjectVersion(File path) {
-        String vLine = path.readLines().find { it.matches('version\\s.*') }
-        getVersion(vLine)
-    }
-
-    def getVersion(String vLine) {
-        if (vLine) {
-            def va = vLine.split('\\s')
-            vLine = va.size() > 1 ? va[1] : null
-        }
-        if (vLine?.contains('//')) {
-            vLine = vLine.split('//')[0]
-        }
-        vLine?.replaceAll('"', '')?.replaceAll("'", '')?.trim() ?: null
-    }
-
+    /**
+     * Create a test project, commenting out the specified lines.
+     * The project's directory is deleted and created again, then project's files are created.
+     * All tests in this test suite use the same test project with some modifications.
+     * The lines that may be commented out are already marked with special comments,
+     * and if that comment is included into the toCommentOut list, the line with that comment
+     * will be commented out. We could just delete such lines, but this way it's easier
+     * to understand what has happened during code generation.
+     * @param toCommentOut list of strings; any line that contains one of this strings will be commented out
+     * @return a SourceBaseDir object that represents the project
+     */
     def createProjectWithout(Collection<String> toCommentOut) {
-        String taskName = System.getProperty('taskName')
-        if (!taskName) {
-            throw new IllegalArgumentException(
-                    "System.getProperty('taskName') returned null, please use in build.gradle: " +
-                            "tasks.withType(Test) { systemProperty 'taskName', name }"
-            )
-        }
         def projectDir = new File("build/functionalTest")
         projectDir.deleteDir()
         projectDir.mkdirs()
         def prj = new SourceBaseDir(projectDir, toCommentOut)
 
-        if (taskName == "scriptFunctionalTest") {
-            prj / "settings.gradle" << """$GROOVY_STRING
-                pluginManagement {
-                    repositories {
-                        mavenLocal()
-                        gradlePluginPortal()
-                    }
-                }
-            """.stripIndent()
-        } else {
-            prj / "settings.gradle" << ""
-        }
+        prj / "settings.gradle" << "$pluginManagementBlock"
 
-        String pluginsBlock = "";
-        if (taskName == "functionalTest") {
-            pluginsBlock = """
-                plugins {
-                    id 'application'
-                    id 'io.github.qux7.testnotrunerror'
-                }
-            """
-        } else if (taskName.startsWith("compatTest")) {
-            pluginsBlock = """
-                buildscript {
-                    def somewhereAbove = { String path ->
-                        File res,  cur = file('..');
-                        while(cur && !(res = new File(cur, path)).exists()) { cur = cur.parentFile };
-                        if (!cur) { throw new IllegalArgumentException("'" + path + "' not found in ancestor directories") };
-                        res
-                    }
-                    dependencies{
-                        classpath fileTree(dir: somewhereAbove('build-with-gradle-6.2.1/build/libs'), include: ['*.jar'])
-                    }
-                }
-                plugins {
-                    id 'application'
-                }
-                apply plugin: 'io.github.qux7.testnotrunerror'
-            """
-        } else if (taskName == "scriptFunctionalTest") {
-            String pluginVersion = getProjectVersion(somewhereAbove('build-with-gradle-6.2.1/build.gradle'))
-            pluginsBlock = """
-                plugins {
-                    id 'application'
-                    id 'io.github.qux7.testnotrunerror' version '$pluginVersion'
-                }
-            """
-        } else {
-            throw new IllegalArgumentException("task name=[" + taskName + "] unsupported task name")
-        }
-        println("task name=[" + taskName + "]")
-        // same indent as in pluginsBlock
-        prj / "build.gradle" << """
-                $pluginsBlock
-    
+        prj / "build.gradle" << "$pluginsBlock" + """$GROOVY_STRING
                 repositories {
                     jcenter()
                 }

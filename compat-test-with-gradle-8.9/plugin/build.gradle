@@ -135,16 +135,7 @@ tasks.withType(Test) {
 }
 // }} show running tests
 
-// pass the task name to the tests
-tasks.withType(Test) {
-    systemProperty 'taskName', name
-}
-
 tasks.named('check') {
     dependsOn 'compatTest'
 }
 
-//println("************** gradle.build "+new File(".").getAbsolutePath())
-//println("************** gradle.build "+file(new File(".")).getAbsolutePath())
-//println("************** gradle.build "+sourceSets.compatTest.runtimeClasspath)
-//sourceSets.compatTest.runtimeClasspath.forEach { println(it) }

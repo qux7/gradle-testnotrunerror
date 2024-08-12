@@ -68,9 +68,5 @@ publishing {
     }
 }
 
-tasks.withType(Test) {
-    systemProperty 'taskName', name
-}
-
 project.tasks.withType(Test) {testLogging.showStandardStreams = true }
 
