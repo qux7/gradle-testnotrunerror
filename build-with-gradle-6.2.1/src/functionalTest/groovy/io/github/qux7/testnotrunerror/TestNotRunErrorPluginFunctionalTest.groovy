@@ -19,12 +19,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = createProjectWithout([]).projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "integrationTest")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "integrationTest")
         def result = runner.build()
 
         then:
@@ -42,17 +38,14 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "test project runs ok with --tests"() {
         given:
         def projectDir = createProjectWithout([]).projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "--tests", "BarTest")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "--tests", "BarTest")
         def result = runner.build()
 
         then:
@@ -71,17 +64,14 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "detects missing unit test"() {
         given:
         def projectDir = createProjectWithout(['//unitTestBar']).projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s")
         def result = runner.buildAndFail()
         println(THIS_BUILD_FAILURE_IS_OK)
 
@@ -101,6 +91,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "detects missing unit test but stopOnFailure = false prevents task failure"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
@@ -111,12 +102,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
             }
         """.stripIndent()
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s")
         def result = runner.build()
 
         then:
@@ -135,6 +122,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "detects missing unit test but command line override prevents task failure"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
@@ -145,12 +133,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
 //            }
 //        """.stripIndent()
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=false")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=false")
         def result = runner.build()
 
         then:
@@ -169,6 +153,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "plugin may be disabled on command line, missing unit tests get ignored"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
@@ -179,12 +164,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
 //            }
 //        """.stripIndent()
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "integrationTest", "-s", "-Ptestnotrunerror.enabled=false")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "integrationTest", "-s", "-Ptestnotrunerror.enabled=false")
         def result = runner.build()
 
         then:
@@ -203,6 +184,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "plugin may be disabled in build.gradle, missing unit tests get ignored"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
@@ -213,12 +195,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
             }
         """.stripIndent()
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "integrationTest", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "integrationTest", "-s")
         def result = runner.build()
 
         then:
@@ -237,6 +215,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "ignores missing unit test if asked"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
@@ -257,12 +236,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s")
         def result = runner.build()
 
         then:
@@ -280,6 +255,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "ignores missing integration test if asked"() {
         given:
         def prj = createProjectWithout(['//integrationTestBar'])
@@ -296,12 +272,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "integrationTest", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "integrationTest", "-s")
         def result = runner.build()
 
         then:
@@ -319,9 +291,10 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "ignores missing unit test but not integration test"() {
         given:
-        def prj = createProjectWithout(['//unitTestFoo','//integrationTestFoo'])
+        def prj = createProjectWithout(['//unitTestFoo', '//integrationTestFoo'])
         prj % "build.gradle" << """
             testnotrunerror {
                 excludes {
@@ -335,12 +308,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "integrationTest", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "integrationTest", "-s")
         def result = runner.buildAndFail()
         println(THIS_BUILD_FAILURE_IS_OK)
 
@@ -359,9 +328,10 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         result.output.contains("[integrationTest] $classCheckErrorMessagePrefix [ftest.FooTest]")
         result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix [ftest.FooTest]")
     }
+
     def "ignores both unit and integration tests"() {
         given:
-        def prj = createProjectWithout(['//unitTestBar','//integrationTestBar'])
+        def prj = createProjectWithout(['//unitTestBar', '//integrationTestBar'])
         prj % "build.gradle" << """
             testnotrunerror {
                 excludes {
@@ -378,12 +348,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "integrationTest", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "integrationTest", "-s")
         def result = runner.build()
 
         then:
@@ -401,9 +367,10 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
+
     def "test all as in compatibility test"() {
         given:
-        def prj = createProjectWithout(['//unitTestBar','//unitTestFoo'])
+        def prj = createProjectWithout(['//unitTestBar', '//unitTestFoo'])
         prj % "build.gradle" << """
             testnotrunerror {
                 excludes {
@@ -420,12 +387,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def projectDir = prj.projectDir
 
         when:
-        def runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        if (System.getProperty('taskName')?.startsWith("compatTest")) { runner.withGradleVersion(System.getProperty("compat.gradle.version")) }
-        runner.withArguments("clean", "test", "-s")
-        runner.withProjectDir(projectDir)
+        def runner = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s")
         def result = runner.buildAndFail()
         println(THIS_BUILD_FAILURE_IS_OK)
 
@@ -455,36 +418,51 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
 //    }
 
     //=============== utils ==========================================
+    GradleRunner createMyGradleRunner(projectDir) {
+        def runner = GradleRunner.create()
+                .forwardOutput()
+                .withPluginClasspath()
+                .withProjectDir(projectDir)
+        if (System.getProperty('taskName')?.startsWith("compatTest")) {
+            runner.withGradleVersion(System.getProperty("compat.gradle.version"))
+        }
+        runner
+    }
+
     def somewhereAbove(String path) {
-        File res,  cur = new File('..');
-        while(cur && !(res = new File(cur, path)).exists()) {
+        File res, cur = new File('..');
+        while (cur && !(res = new File(cur, path)).exists()) {
             cur = cur.toPath().toAbsolutePath().normalize().toFile().parentFile
         };
-        if (!cur) { throw new IllegalArgumentException("'" + path + "' not found in ancestor directories") };
+        if (!cur) {
+            throw new IllegalArgumentException("'" + path + "' not found in ancestor directories")
+        };
         //new File('.').relatvePath(res)
         res
     }
+
     def getProjectVersion(File path) {
         String vLine = path.readLines().find { it.matches('version\\s.*') }
         getVersion(vLine)
     }
+
     def getVersion(String vLine) {
         if (vLine) {
             def va = vLine.split('\\s')
-            vLine = va.size()>1?va[1]:null
+            vLine = va.size() > 1 ? va[1] : null
         }
         if (vLine?.contains('//')) {
             vLine = vLine.split('//')[0]
         }
-        vLine?.replaceAll('"','')?.replaceAll("'",'')?.trim()?:null
+        vLine?.replaceAll('"', '')?.replaceAll("'", '')?.trim() ?: null
     }
 
     def createProjectWithout(Collection<String> toCommentOut) {
         String taskName = System.getProperty('taskName')
         if (!taskName) {
             throw new IllegalArgumentException(
-                "System.getProperty('taskName') returned null, please use in build.gradle: " +
-                "tasks.withType(Test) { systemProperty 'taskName', name }"
+                    "System.getProperty('taskName') returned null, please use in build.gradle: " +
+                            "tasks.withType(Test) { systemProperty 'taskName', name }"
             )
         }
         def projectDir = new File("build/functionalTest")
@@ -541,9 +519,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                 }
             """.stripIndent()
         } else {
-            throw new IllegalArgumentException("task name=["+taskName+"] unsupported task name")
+            throw new IllegalArgumentException("task name=[" + taskName + "] unsupported task name")
         }
-        println("task name=["+taskName+"]")
+        println("task name=[" + taskName + "]")
         //println("pluginsBlock=[$pluginsBlock]")
         prj / "build.gradle" << """
             $pluginsBlock
@@ -721,6 +699,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     }
 
 }
+
 class SourceFile {
     File file
     Collection<String> toCommentOut
@@ -731,6 +710,7 @@ class SourceFile {
         this.fileMustExist = fileMustExist
         this.toCommentOut = toCommentOut
     }
+
     def leftShift(String s) {
         if (fileMustExist) {
             if (!file.exists()) {
@@ -746,6 +726,7 @@ class SourceFile {
         }
         file << commentOut(toCommentOut, s)
     }
+
     def commentOut(Collection<String> toCommentOut, String sourceCode) {
         sourceCode
                 .readLines()
@@ -757,6 +738,7 @@ class SourceFile {
                 .join("\n")
     }
 }
+
 class SourceBaseDir {
     File projectDir
     Collection<String> toCommentOut
@@ -769,6 +751,7 @@ class SourceBaseDir {
     def div(String relativePath) {
         new SourceFile(projectDir, relativePath, false, toCommentOut)
     }
+
     def mod(String relativePath) {
         new SourceFile(projectDir, relativePath, true, toCommentOut)
     }
