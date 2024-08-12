@@ -12,7 +12,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     static String javaSourceCheckErrorMessagePrefix = "Java source files are present but tests were not executed:"
     static String testFilterDetected = "no error because --tests was specified on the command line"
     static String stopOnFailureDisabled = "no error because `testnotrunerror { stopOnFailure = false }` was specified"
-    private static String THIS_BUILD_FAILURE_IS_OK = "^^^^^ ^^^^^^ THIS BUILD WAS EXPECTED TO FAIL"
+    static String THIS_BUILD_FAILURE_IS_OK = "^^^^^ ^^^^^^ THIS BUILD WAS EXPECTED TO FAIL"
+    static String GROOVY_STRING = "" // to force GStringImpl, so that Groovy's stripIntent() is used, that ignores the length of the last blank line
 
     def "test project runs ok"() {
         given:
@@ -96,11 +97,12 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
         def projectDir = prj.projectDir
-        prj % "build.gradle" << """
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 stopOnFailure = false
             }
         """.stripIndent()
+
         when:
         def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s")
@@ -127,11 +129,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
         def projectDir = prj.projectDir
-//        prj % "build.gradle" << """
-//            testnotrunerror {
-//                stopOnFailure = false
-//            }
-//        """.stripIndent()
+
         when:
         def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=false")
@@ -158,11 +156,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
         def projectDir = prj.projectDir
-//        prj % "build.gradle" << """
-//            testnotrunerror {
-//                stopOnFailure = false
-//            }
-//        """.stripIndent()
+
         when:
         def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "integrationTest", "-s", "-Ptestnotrunerror.enabled=false")
@@ -189,7 +183,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
         def projectDir = prj.projectDir
-        prj % "build.gradle" << """
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 enabled = false
             }
@@ -219,8 +213,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     def "ignores missing unit test if asked"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
-        prj % "build.gradle" << """
-
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 excludes {
                     // task names must not conflict with script variable names!
@@ -259,7 +252,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     def "ignores missing integration test if asked"() {
         given:
         def prj = createProjectWithout(['//integrationTestBar'])
-        prj % "build.gradle" << """
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 excludes {
                     // task names must not conflict with script variable names!
@@ -295,7 +288,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     def "ignores missing unit test but not integration test"() {
         given:
         def prj = createProjectWithout(['//unitTestFoo', '//integrationTestFoo'])
-        prj % "build.gradle" << """
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 excludes {
                     // task names must not conflict with script variable names!
@@ -332,7 +325,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     def "ignores both unit and integration tests"() {
         given:
         def prj = createProjectWithout(['//unitTestBar', '//integrationTestBar'])
-        prj % "build.gradle" << """
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 excludes {
                     // task names must not conflict with script variable names!
@@ -371,7 +364,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
     def "test all as in compatibility test"() {
         given:
         def prj = createProjectWithout(['//unitTestBar', '//unitTestFoo'])
-        prj % "build.gradle" << """
+        prj % "build.gradle" << """$GROOVY_STRING
             testnotrunerror {
                 excludes {
                     // task names must not conflict with script variable names!
@@ -407,18 +400,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
-//    @spock.lang.Ignore
-//    def "just create" () {
-//        given:
-//        createProjectWithout([])
-//        when:
-//        println('------------ok-----------')
-//        then:
-//        true == true
-//    }
 
     //=============== utils ==========================================
-    GradleRunner createMyGradleRunner(projectDir) {
+    GradleRunner createMyGradleRunner(File projectDir) {
         def runner = GradleRunner.create()
                 .forwardOutput()
                 .withPluginClasspath()
@@ -471,7 +455,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
         def prj = new SourceBaseDir(projectDir, toCommentOut)
 
         if (taskName == "scriptFunctionalTest") {
-            prj / "settings.gradle" << """
+            prj / "settings.gradle" << """$GROOVY_STRING
                 pluginManagement {
                     repositories {
                         mavenLocal()
@@ -480,8 +464,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                 }
             """.stripIndent()
         } else {
-            prj / "settings.gradle" << """
-            """.stripIndent()
+            prj / "settings.gradle" << ""
         }
 
         String pluginsBlock = "";
@@ -491,9 +474,9 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                     id 'application'
                     id 'io.github.qux7.testnotrunerror'
                 }
-            """.stripIndent()
+            """
         } else if (taskName.startsWith("compatTest")) {
-            pluginsBlock = """\
+            pluginsBlock = """
                 buildscript {
                     def somewhereAbove = { String path ->
                         File res,  cur = file('..');
@@ -509,64 +492,64 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                     id 'application'
                 }
                 apply plugin: 'io.github.qux7.testnotrunerror'
-            """.stripIndent()
+            """
         } else if (taskName == "scriptFunctionalTest") {
             String pluginVersion = getProjectVersion(somewhereAbove('build-with-gradle-6.2.1/build.gradle'))
-            pluginsBlock = """\
+            pluginsBlock = """
                 plugins {
                     id 'application'
                     id 'io.github.qux7.testnotrunerror' version '$pluginVersion'
                 }
-            """.stripIndent()
+            """
         } else {
             throw new IllegalArgumentException("task name=[" + taskName + "] unsupported task name")
         }
         println("task name=[" + taskName + "]")
-        //println("pluginsBlock=[$pluginsBlock]")
+        // same indent as in pluginsBlock
         prj / "build.gradle" << """
-            $pluginsBlock
-
-            repositories {
-                jcenter()
-            }
-
-            // integrationTest {
-            sourceSets {
-                integrationTest {
-                    compileClasspath += sourceSets.main.output
-                    runtimeClasspath += sourceSets.main.output
+                $pluginsBlock
+    
+                repositories {
+                    jcenter()
                 }
-            }
-            configurations {
-                integrationTestImplementation.extendsFrom implementation
-                integrationTestRuntimeOnly.extendsFrom runtimeOnly
-            }
-            dependencies {
-                integrationTestImplementation 'junit:junit:4.12'
-            }
-            tasks.register('integrationTest', Test) {
-                description = 'Runs integration tests.'
-                group = 'verification'
-
-                testClassesDirs = sourceSets.integrationTest.output.classesDirs
-                classpath = sourceSets.integrationTest.runtimeClasspath
-                shouldRunAfter('test')
-            }
-            // } integrationTest
-
-            dependencies {
-                testImplementation 'junit:junit:4.12'
-            }
-
-            application {
-                mainClassName = 'ftest.App'
-            }
-
-            project.tasks.withType(Test) {
-                testLogging.showStandardStreams = true
-            }
+    
+                // integrationTest {
+                sourceSets {
+                    integrationTest {
+                        compileClasspath += sourceSets.main.output
+                        runtimeClasspath += sourceSets.main.output
+                    }
+                }
+                configurations {
+                    integrationTestImplementation.extendsFrom implementation
+                    integrationTestRuntimeOnly.extendsFrom runtimeOnly
+                }
+                dependencies {
+                    integrationTestImplementation 'junit:junit:4.12'
+                }
+                tasks.register('integrationTest', Test) {
+                    description = 'Runs integration tests.'
+                    group = 'verification'
+    
+                    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+                    classpath = sourceSets.integrationTest.runtimeClasspath
+                    shouldRunAfter('test')
+                }
+                // } integrationTest
+    
+                dependencies {
+                    testImplementation 'junit:junit:4.12'
+                }
+    
+                application {
+                    mainClassName = 'ftest.App'
+                }
+    
+                project.tasks.withType(Test) {
+                    testLogging.showStandardStreams = true
+                }
         """.stripIndent()
-        prj / "src/main/java/ftest/App.java" << """
+        prj / "src/main/java/ftest/App.java" << """$GROOVY_STRING
             package ftest;
 
             public class App {
@@ -586,7 +569,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
             }
         """.stripIndent()
         //====test====
-        prj / "src/test/java/ftest/AppTest.java" << """
+        prj / "src/test/java/ftest/AppTest.java" << """$GROOVY_STRING
             package ftest;
             
             import org.junit.Test;
@@ -604,7 +587,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                 }
             }
         """.stripIndent()
-        prj / "src/test/java/ftest/BarTest.java" << """
+        prj / "src/test/java/ftest/BarTest.java" << """$GROOVY_STRING
             package ftest;
             
             import org.junit.Test;
@@ -622,7 +605,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                 }
             }
         """.stripIndent()
-        prj / "src/test/java/ftest/FooTest.java" << """
+        prj / "src/test/java/ftest/FooTest.java" << """$GROOVY_STRING
             package ftest;
             
             import org.junit.Test;
@@ -641,7 +624,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
             }
         """.stripIndent()
         //====integrationTest====
-        prj / "src/integrationTest/java/ftest/AppTest.java" << """
+        prj / "src/integrationTest/java/ftest/AppTest.java" << """$GROOVY_STRING
             package ftest;
             
             import org.junit.Test;
@@ -659,7 +642,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                 }
             }
         """.stripIndent()
-        prj / "src/integrationTest/java/ftest/BarIntTest.java" << """
+        prj / "src/integrationTest/java/ftest/BarIntTest.java" << """$GROOVY_STRING
             package ftest;
             
             import org.junit.Test;
@@ -677,7 +660,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification {
                 }
             }
         """.stripIndent()
-        prj / "src/integrationTest/java/ftest/FooTest.java" << """
+        prj / "src/integrationTest/java/ftest/FooTest.java" << """$GROOVY_STRING
             package ftest;
             
             import org.junit.Test;
