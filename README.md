@@ -48,8 +48,24 @@ testnotrunerror {
 ```
 
 ### Command-line overrides
+You can override the boolean configuration parameters on the command line.
+#### Mnemonic overrides
+The valid combinations are:
+```
+-Ptest.not.run=error    enable this plugin, report problems as errors (the build will fail)
+-Ptest.not.run=warning  enable this plugin, report problems as warnings (the build will not fail)
+-Ptest.not.run=ignore   disable this plugin, do not report problems
+```
+If both `checkJavaSources` and `checkClasses` are set to `false`, these overrides
+set both `checkJavaSources` and `checkClasses` to `true`.
 
-You can override the boolean configuration parameters on the command line, the syntax looks like:
+For example:
+```
+./gradlew clean build -Ptest.not.run=error
+```
+#### Flag overrides
+
+You can override each of the boolean configuration parameters separately, the syntax looks like:
 ```
 -Ptestnotrunerror.<parameter>=[true|false]
 ```
@@ -68,6 +84,16 @@ For example:
 ```
 ./gradlew clean build -Ptestnotrunerror.stopOnFailure=false -Ptestnotrunerror.checkClasses=true
 ```
+#### Combining these two kinds of overrides
+
+First, the configuration in the build file is applied.
+Then, one mnemonic override, if present, is applied.
+(Gradle uses a map for command-line properties, so it is impossible to have two values for the same key).
+Then, the flag overrides are applied.
+Then, if there was a mnemonic override that enabled the plugin (and thus expressed an intention to perform a check),
+but both `checkJavaSources` and `checkClasses` are set to `false` (so that both types of checking are disabled),
+then both `checkJavaSources` and `checkClasses` get set to `true` and thus both types of checking get enabled.
+(And if only one method of checking is enabled, the other one remains disabled.)
 
 ## About this repository
 

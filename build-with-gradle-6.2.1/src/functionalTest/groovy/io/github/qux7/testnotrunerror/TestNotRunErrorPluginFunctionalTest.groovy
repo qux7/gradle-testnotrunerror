@@ -155,6 +155,33 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
 
+    def "detects missing unit test but command line override prevents task failure, approach 2"() {
+        given:
+        def prj = createProjectWithout(['//unitTestBar'])
+        def projectDir = prj.projectDir
+
+        when:
+        def result = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s", "-Ptest.not.run=warning")
+                .build()
+
+        then:
+        result.output.contains("running unitTestApp()")
+        result.output.contains("running unitTestFoo()")
+        !result.output.contains("running unitTestBar()")
+        result.output.contains("[test] Total tests run: 2")
+        result.output.contains("[test] $classCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $javaSourceCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $stopOnFailureDisabled")
+
+        !result.output.contains("running integrationTestApp()")
+        !result.output.contains("running integrationTestFoo()")
+        !result.output.contains("running integrationTestBar()")
+        !result.output.contains("[integrationTest] Total tests run:")
+        !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
+        !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+    }
+
     def "plugin may be disabled on command line, missing unit tests get ignored"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])

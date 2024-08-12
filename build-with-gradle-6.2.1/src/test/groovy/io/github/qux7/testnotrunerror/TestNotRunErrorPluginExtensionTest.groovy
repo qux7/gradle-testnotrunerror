@@ -3,11 +3,11 @@ package io.github.qux7.testnotrunerror
 import spock.lang.Specification
 
 class TestNotRunErrorPluginExtensionTest extends Specification {
-    def "test setFromMap to true"() {
+    def "test setFieldsFromMap to true"() {
         when:
         def e =
                 new TestNotRunErrorPluginExtension(stopOnFailure: false, checkClasses: false, checkJavaSources: false, enabled: false)
-                        .setFromMap(('testnotrunerror.' + field): 'true') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
+                        .setFieldsFromMap(('testnotrunerror.' + field): 'true') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
         then:
         e[field] == true
 
@@ -18,11 +18,11 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
         field << TestNotRunErrorPluginExtension.booleanFields
     }
 
-    def "test setFromMap to false"() {
+    def "test setFieldsFromMap to false"() {
         when:
         def e =
                 new TestNotRunErrorPluginExtension()
-                        .setFromMap(('testnotrunerror.' + field): 'false') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
+                        .setFieldsFromMap(('testnotrunerror.' + field): 'false') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
         then:
         e[field] == false
 
@@ -33,10 +33,10 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
         field << TestNotRunErrorPluginExtension.booleanFields
     }
 
-    def "test setFromMap to invalid string"() {
+    def "test setFieldsFromMap to invalid string"() {
         when:
         def e = new TestNotRunErrorPluginExtension()
-        def f = e.setFromMap(('testnotrunerror.' + field): 'foo') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
+        def f = e.setFieldsFromMap(('testnotrunerror.' + field): 'foo') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
         then:
         e[field] == true
         !f
@@ -49,5 +49,42 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
 
         where:
         field << TestNotRunErrorPluginExtension.booleanFields
+    }
+
+    def "test setMnemonicFromMap"() {
+        when:
+        def ee = new TestNotRunErrorPluginExtension(stopOnFailure: init, checkClasses: init, checkJavaSources: init, enabled: init)
+        def ff = ee.setMnemonicFromMap('test.not.run': value) { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
+        then:
+        ee.enabled == en
+        ee.stopOnFailure == st
+        ee.checkClasses == cc
+        ee.checkJavaSources == cj
+        ff
+
+        where:
+        init  | value     || cc    | cj    | en    | st
+        true  | 'error'   || true  | true  | true  | true
+        true  | 'warning' || true  | true  | true  | false
+        true  | 'ignore'  || true  | true  | false | false
+        false | 'error'   || false | false | true  | true
+        false | 'warning' || false | false | true  | false
+        false | 'ignore'  || false | false | false | false
+    }
+
+    def "test setMnemonicFromMap with invalid string"() {
+        when:
+        def e = new TestNotRunErrorPluginExtension()
+        def f = e.setMnemonicFromMap('test.not.run': 'plain-wrong') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
+
+        then:
+        !f
+        def ex = thrown(RuntimeException)
+        ex
+        ex.getMessage() == "failed to add pair (test.not.run: plain-wrong)"
+
+        and:
+        TestNotRunErrorPluginExtension.booleanFields.every { e[it] == true }
+
     }
 }
