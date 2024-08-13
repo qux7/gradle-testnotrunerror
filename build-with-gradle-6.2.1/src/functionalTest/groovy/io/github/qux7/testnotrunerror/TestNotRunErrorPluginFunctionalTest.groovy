@@ -18,7 +18,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
     /** Force GStringImpl: Groovy's stripIntent() ignores the length of the last blank line */
     static String GROOVY_STRING = ""
 
-    def "test project runs ok"() {
+    def "can build project, run and re-run tests"() {
         given:
         def projectDir = createProjectWithout([]).projectDir
 
@@ -41,6 +41,27 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         result.output.contains("[integrationTest] Total tests run: 3")
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+
+        when:
+        def result2 = createMyGradleRunner(projectDir)
+                .withArguments("test")
+                .build()
+
+        then:
+        result2.output.contains("Task :test UP-TO-DATE")
+        !result2.output.contains("running unitTestApp()")
+        !result2.output.contains("running unitTestFoo()")
+        !result2.output.contains("running unitTestBar()")
+        !result2.output.contains("[test] Total tests run: 3")
+        !result2.output.contains("[test] $classCheckErrorMessagePrefix")
+        !result2.output.contains("[test] $javaSourceCheckErrorMessagePrefix")
+
+        !result2.output.contains("running integrationTestApp()")
+        !result2.output.contains("running integrationTestFoo()")
+        !result2.output.contains("running integrationTestBar()")
+        !result2.output.contains("[integrationTest] Total tests run: 3")
+        !result2.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
+        !result2.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
 
     def "test project runs ok with --tests"() {
