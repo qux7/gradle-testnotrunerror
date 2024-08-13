@@ -33,9 +33,6 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
         println("Gradle version: " + GradleVersion.current().version + "; Groovy version: " + GroovySystem.version + "; Java version: " + System.getProperty("java.version"));
         def extension = project.extensions.create("testnotrunerror", TestNotRunErrorPluginExtension)
         NamedDomainObjectContainer<TestTaskExcludeClassNames> perTaskExcludes = project.container(TestTaskExcludeClassNames)
-//        perTaskExcludes.all {
-//            excludeClassNames = []
-//        }
         extension.extensions.excludes = perTaskExcludes
 
         project.tasks.withType(Test) {
@@ -55,16 +52,6 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
             }
             afterTest { desc, res ->
                 if (extension.enabled) {
-                    println("afterTest: " + extension)
-                    println("afterTest: this prop=" + project.findProperty("testnotrunerror")) ////
-                    println("afterTest: root prop=" + project.rootProject.findProperty("testnotrunerror")) ////
-                    //println("afterTest: prop="+findProperty("testnotrunerror.enabled")) ////
-                    println("afterTest: this prop=" + project.findProperty("testnotrunerror.enabled")) ////
-                    println("afterTest: root prop=" + project.rootProject.findProperty("testnotrunerror.enabled")) ////
-                }
-            }
-            afterTest { desc, res ->
-                if (extension.enabled) {
                     runTestSet.add(desc.className);
                     testCount.incrementAndGet()
                 }
@@ -80,22 +67,12 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
                 if (extension.enabled) {
                     if (extension.checkClasses) {
                         def compiledTestSet = getCompiledClassNames(testClassesDirs)
-//                    println('^^^^^^^^^^^^^^^^^^')
-//                    println("name=$name")
-//                    println("perTaskExcludes=$perTaskExcludes")
-//                    println("perTaskExcludes[name]=" + perTaskExcludes?.findByName(name))
                         def excludes = perTaskExcludes?.findByName(name)?.excludeClassNames ?: []
                         def diff = compiledTestSet - runTestSet - excludes
-//                    println("compiledTestSet=$compiledTestSet")
-//                    println("runTestSet=$runTestSet")
-//                    println("excludes=$excludes")
-//                    println("diff=$diff")
                         if (diff) {
                             String msg = "[$name] $classCheckErrorMessagePrefix ${new TreeSet<>(diff)}"
                             println(msg)
-//                        if (extension.stopOnFailure) {
                             exceptionMessage1 = msg
-//                        }
                         }
                     }
                 }
@@ -105,20 +82,13 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
                 if (extension.enabled) {
                     if (extension.checkJavaSources) {
                         def javaDirs = project.sourceSets[name].java.srcDirs
-//                    println("task $name srcDirs: $javaDirs")
                         def javaSourceTestSet = getClassNamesFromSources(javaDirs)
                         def excludes = perTaskExcludes?.findByName(name)?.excludeClassNames ?: []
                         def diff = javaSourceTestSet - runTestSet - excludes
-//                    println("javaSourceTestSet=$javaSourceTestSet")
-//                    println("runTestSet=$runTestSet")
-//                    println("excludes=$excludes")
-//                    println("diff=$diff")
                         if (diff) {
                             String msg = "[$name] $javaSourceCheckErrorMessagePrefix ${new TreeSet<>(diff)}"
                             println(msg)
-//                        if (extension.stopOnFailure) {
                             exceptionMessage2 = msg
-//                        }
                         }
                     }
                 }
