@@ -467,6 +467,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         projectDir.mkdirs()
         def prj = new SourceBaseDir(projectDir, toCommentOut)
 
+        //==== build script ====
         prj / "settings.gradle" << "$pluginManagementBlock"
 
         prj / "build.gradle" << "$pluginsBlock" + """$GROOVY_STRING
@@ -510,6 +511,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
                     testLogging.showStandardStreams = true
                 }
         """.stripIndent()
+        //==== source code ====
         prj / "src/main/java/ftest/App.java" << """$GROOVY_STRING
             package ftest;
 
@@ -522,14 +524,22 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
                     System.out.println(new App().getGreeting());
                 }
             }
+        """.stripIndent()
+        prj / "src/main/java/ftest/Foo.java" << """$GROOVY_STRING
+            package ftest;
+
             class Foo {
                 String foo() { return "foo"; }
             }
+        """.stripIndent()
+        prj / "src/main/java/ftest/Bar.java" << """$GROOVY_STRING
+            package ftest;
+
             class Bar {
                 String bar() { return "bar"; }
             }
         """.stripIndent()
-        //====test====
+        //==== unit tests ====
         prj / "src/test/java/ftest/AppTest.java" << """$GROOVY_STRING
             package ftest;
             
@@ -584,7 +594,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
                 }
             }
         """.stripIndent()
-        //====integrationTest====
+        //==== integration tests ====
         prj / "src/integrationTest/java/ftest/AppTest.java" << """$GROOVY_STRING
             package ftest;
             
@@ -639,6 +649,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
                 }
             }
         """.stripIndent()
+        //==== end ====
         return prj
     }
 
