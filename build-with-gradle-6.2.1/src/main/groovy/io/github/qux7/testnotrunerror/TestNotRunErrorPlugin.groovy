@@ -77,7 +77,7 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
                         def excludes = perTaskExcludes?.findByName(name)?.excludeClassNames ?: []
                         diffJava = javaSourceTestSet - runTestSet - excludes
                     }
-                    if (extension.readJavaFiles) {
+                    if (extension.readSourceFiles) {
                         def javaDirs = project.sourceSets[name].java.srcDirs
                         def toIgnore = getFilesMarkedToIgnore(javaDirs, diffClasses + diffJava)
                         diffClasses -= toIgnore

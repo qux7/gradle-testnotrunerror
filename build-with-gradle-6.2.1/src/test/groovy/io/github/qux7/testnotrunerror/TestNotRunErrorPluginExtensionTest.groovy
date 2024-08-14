@@ -89,6 +89,6 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
     }
 
     TestNotRunErrorPluginExtension newTestNotRunErrorPluginExtension(boolean init) {
-        new TestNotRunErrorPluginExtension(stopOnFailure: init, checkClasses: init, checkJavaSources: init, readJavaFiles: init, enabled: init)
+        new TestNotRunErrorPluginExtension(stopOnFailure: init, checkClasses: init, checkJavaSources: init, readSourceFiles: init, enabled: init)
     }
 }
