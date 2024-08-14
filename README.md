@@ -69,6 +69,8 @@ class MyUtils {
     ...
 }
 ```
+The plugin check for the string `@test.not.run=ignore` *anywhere* in the file,
+so it does not matter what kind of comment you use, and whether it is a comment.
 
 ### Command-line overrides
 You can override the boolean configuration parameters on the command line.
@@ -98,10 +100,12 @@ The valid combinations are:
 -Ptestnotrunerror.stopOnFailure=true          report problems as errors (the build will fail)
 -Ptestnotrunerror.checkClasses=true           check .class files, are there any whose tests do not run?
 -Ptestnotrunerror.checkJavaSources=true       check .java files, are there any whose tests do not run?
+-Ptestnotrunerror.readSourceFiles=true        suppress error if the source file contains "@test.not.run=ignore"
 -Ptestnotrunerror.enabled=false               disable this plugin
 -Ptestnotrunerror.stopOnFailure=false         report problems as warnings (no build failure)
 -Ptestnotrunerror.checkClasses=false          do not check .class files
 -Ptestnotrunerror.checkJavaSources=false      do not check .java files
+-Ptestnotrunerror.readSourceFiles=false       do not suppress error if the source file contains "@test.not.run=ignore"
 ```
 For example:
 ```
