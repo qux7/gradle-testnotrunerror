@@ -6,7 +6,7 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
     def "test setFieldsFromMap to true"() {
         when:
         def e =
-                new TestNotRunErrorPluginExtension(stopOnFailure: false, checkClasses: false, checkJavaSources: false, enabled: false)
+                newTestNotRunErrorPluginExtension(false)
                         .setFieldsFromMap(('testnotrunerror.' + field): 'true') { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
         then:
         e[field] == true
@@ -53,7 +53,7 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
 
     def "test setMnemonicFromMap"() {
         when:
-        def ee = new TestNotRunErrorPluginExtension(stopOnFailure: init, checkClasses: init, checkJavaSources: init, enabled: init)
+        def ee = newTestNotRunErrorPluginExtension(init)
         def ff = ee.setMnemonicFromMap('test.not.run': value) { k, v -> throw new RuntimeException("failed to add pair ($k: $v)") }
         then:
         ee.enabled == en
@@ -86,5 +86,9 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
         and:
         TestNotRunErrorPluginExtension.booleanFields.every { e[it] == true }
 
+    }
+
+    TestNotRunErrorPluginExtension newTestNotRunErrorPluginExtension(boolean init) {
+        new TestNotRunErrorPluginExtension(stopOnFailure: init, checkClasses: init, checkJavaSources: init, readJavaFiles: init, enabled: init)
     }
 }

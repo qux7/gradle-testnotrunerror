@@ -127,4 +127,68 @@ public class TestNotRunErrorPluginTest extends Specification {
         classNames2 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux', 'baz.qux.FooBar'].toSet()
         classNames3 == ['baz.qux.Baar'].toSet()
     }
+
+    def "can detect @test.not.run=ignore"() {
+        given:
+        def projectDir = new File("build/unitTest")
+        projectDir.deleteDir()
+        projectDir.mkdirs()
+        new File(projectDir, "src/main/java/foo/bar").mkdirs()
+        new File(projectDir, "src/main/java/foo/bar/Foo.java") << """${''}
+            /**
+             * this is a test
+             */
+            package foo.bar;
+
+            //@test.not.run=ignore
+            class Foo {
+            } 
+            """.stripIndent()
+        new File(projectDir, "src/main/java/foo/bar/Bar.java") << """${''}
+            /**
+             * this is a test
+             */
+            package foo.bar;
+
+            class Bar {
+            } 
+            """.stripIndent()
+        new File(projectDir, "src/main/java/foo/bar/Baz.java") << """${''}
+            /**
+             * this is a test
+             */
+            package foo.bar;
+
+            //@test.not.run!=ignore
+            class Baz {
+            } 
+            """.stripIndent()
+        new File(projectDir, "src/main/java/foo/bar/Qux.java") << """${''}
+            /**
+             * this is a test
+             */
+            package foo.bar;
+
+            //@test.not.run=ignore// this is to let the plugin know that it's not a test
+            class Qux {
+            } 
+            """.stripIndent()
+
+        when:
+        def isFooMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Foo.java"))
+        def isBarMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Bar.java"))
+        def isBazMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Baz.java"))
+        def isQuxMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Qux.java"))
+
+        then:
+        isFooMarked
+        !isBarMarked
+        !isBazMarked
+        isQuxMarked
+    }
+
+    def "test classNameToFileName"() {
+        expect:
+        'foo/bar/Baz.java' == TestNotRunErrorPlugin.classNameToFileName('foo.bar.Baz', '.java')
+    }
 }

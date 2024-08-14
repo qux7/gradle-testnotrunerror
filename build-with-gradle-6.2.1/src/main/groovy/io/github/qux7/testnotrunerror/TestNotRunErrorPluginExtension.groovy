@@ -6,9 +6,10 @@ class TestNotRunErrorPluginExtension {
     boolean stopOnFailure = true
     boolean checkClasses = true
     boolean checkJavaSources = true
+    boolean readJavaFiles = true
     boolean enabled = true
 
-    static final List booleanFields = ['stopOnFailure', 'checkClasses', 'checkJavaSources', 'enabled'].asImmutable()
+    static final List booleanFields = ['stopOnFailure', 'checkClasses', 'checkJavaSources', 'readJavaFiles', 'enabled'].asImmutable()
 
     @Override
     public String toString() {
@@ -16,6 +17,7 @@ class TestNotRunErrorPluginExtension {
                 "stopOnFailure=" + stopOnFailure +
                 ", checkClasses=" + checkClasses +
                 ", checkJavaSources=" + checkJavaSources +
+                ", readJavaFiles=" + readJavaFiles +
                 ", enabled=" + enabled +
                 '}';
     }

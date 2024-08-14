@@ -65,31 +65,33 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
 
             doLast {
                 if (extension.enabled) {
+                    Set<String> diffClasses = [], diffJava = []
                     if (extension.checkClasses) {
                         def compiledTestSet = getCompiledClassNames(testClassesDirs)
                         def excludes = perTaskExcludes?.findByName(name)?.excludeClassNames ?: []
-                        def diff = compiledTestSet - runTestSet - excludes
-                        if (diff) {
-                            String msg = "[$name] $classCheckErrorMessagePrefix ${new TreeSet<>(diff)}"
-                            println(msg)
-                            exceptionMessage1 = msg
-                        }
+                        diffClasses = compiledTestSet - runTestSet - excludes
                     }
-                }
-            }
-
-            doLast {
-                if (extension.enabled) {
                     if (extension.checkJavaSources) {
                         def javaDirs = project.sourceSets[name].java.srcDirs
                         def javaSourceTestSet = getClassNamesFromSources(javaDirs)
                         def excludes = perTaskExcludes?.findByName(name)?.excludeClassNames ?: []
-                        def diff = javaSourceTestSet - runTestSet - excludes
-                        if (diff) {
-                            String msg = "[$name] $javaSourceCheckErrorMessagePrefix ${new TreeSet<>(diff)}"
-                            println(msg)
-                            exceptionMessage2 = msg
-                        }
+                        diffJava = javaSourceTestSet - runTestSet - excludes
+                    }
+                    if (extension.readJavaFiles) {
+                        def javaDirs = project.sourceSets[name].java.srcDirs
+                        def toIgnore = getFilesMarkedToIgnore(javaDirs, diffClasses + diffJava)
+                        diffClasses -= toIgnore
+                        diffJava -= toIgnore
+                    }
+                    if (diffClasses) {
+                        String msg = "[$name] $classCheckErrorMessagePrefix ${new TreeSet<>(diffClasses)}"
+                        println(msg)
+                        exceptionMessage1 = msg
+                    }
+                    if (diffJava) {
+                        String msg = "[$name] $javaSourceCheckErrorMessagePrefix ${new TreeSet<>(diffJava)}"
+                        println(msg)
+                        exceptionMessage2 = msg
                     }
                 }
             }
@@ -110,35 +112,85 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
             }
         }
     }
+
+    /**
+     * Knowing the directories where the compiled classes go, classesDirs,  find all their class names.
+     * @param classesDirs a collection of directories with classes
+     * @return a Set<String> of class names
+     */
     static def getCompiledClassNames(classesDirs) {
         def testClassSet = ConcurrentHashMap.newKeySet()
         def sep = Pattern.quote(File.separator)
-        classesDirs.each {
-            if (it.exists()) {
-                def dir = it.toString()+File.separator;
-                it.eachFileRecurse {
-                    if (it ==~ /.*$sep[A-Za-z_][A-Za-z0-9_]*\.class/) {
-                        testClassSet += (it.toString()-dir-'.class').replaceAll(sep,'.')
-                    }
+        classesDirs.findAll { it.exists() }.each {
+            def dir = it.toString() + File.separator;
+            it.eachFileRecurse {
+                if (it ==~ /.*$sep[A-Za-z_][A-Za-z0-9_]*\.class/) {
+                    testClassSet += (it.toString() - dir - '.class').replaceAll(sep, '.')
                 }
             }
         }
         return testClassSet
     }
+
+    /**
+     * Knowing the directories where the Java sources are, javaDirs, find all corresponding class names.
+     * @param javaDirs a collection of directories with java files
+     * @return a Set<String> of class names
+     */
     static def getClassNamesFromSources(javaDirs) {
         def testClassSet = ConcurrentHashMap.newKeySet()
         def sep = Pattern.quote(File.separator)
-        javaDirs.each {
-            if (it.exists()) {
-                def dir = it.toString()+File.separator;
-                it.eachFileRecurse {
-                    if (it ==~ /.*$sep[A-Za-z_][A-Za-z0-9_]*\.java/) {
-                        testClassSet += (it.toString()-dir-'.java').replaceAll(sep,'.')
-                    }
+        javaDirs.findAll { it.exists() }.each {
+            def dir = it.toString() + File.separator;
+            it.eachFileRecurse {
+                if (it ==~ /.*$sep[A-Za-z_][A-Za-z0-9_]*\.java/) {
+                    testClassSet += (it.toString() - dir - '.java').replaceAll(sep, '.')
                 }
             }
         }
         return testClassSet
+    }
+
+    /**
+     * Knowing the directories where the Java sources are, javaDirs, find all class names mentioned in classNameSet
+     * such that the corresponding source file contains "@test.not.run=ignore"
+     * @param javaDirs
+     * @param classNameSet
+     * @return
+     */
+    static def getFilesMarkedToIgnore(javaDirs, classNameSet) {
+        def dirs = javaDirs.findAll { it.exists() }
+        classNameSet.findAll { className ->
+            dirs.any { File dir ->
+                def f = new File(dir, classNameToFileName(className, '.java'))
+                f.exists() && isMarkedForIgnoring(f)
+            }
+        }
+    }
+
+    /**
+     * Check if the file contents contain the string "@test.not.run=ignore", which means that if tests from the file
+     * do not run, e.g. because there is no tests, this plugin must ignore it.
+     * @param f file with source code
+     * @return true if the file contains the string "@test.not.run=ignore"
+     */
+    static boolean isMarkedForIgnoring(File f) {
+        // instead of reading the whole potentially huge file at once, we read it via BufferedReader
+        // that filterLine() uses. The bad news is that we still read the whole file.
+        def myBuffer = new CharArrayWriter()
+        f.filterLine { it.contains("@test.not.run=ignore") }.writeTo(myBuffer)
+        myBuffer.toString()
+    }
+
+    /**
+     * Convert class name to Java source file name, e.g. classNameToFileName('foo.Bar', '.java) gives 'foo/Bar.java'.
+     * Nested classes are not supported.
+     * @param className full Java class name, e.g. 'foo.bar.Baz'
+     * @param suffix file extension, including dot, e.g. '.java'
+     * @return the corresponding file name
+     */
+    static String classNameToFileName(String className, String suffix) {
+        className.replaceAll(Pattern.quote('.'), '/') + suffix
     }
 }
 
