@@ -31,6 +31,9 @@ testnotrunerror {
                             // from which no tests were run.
     checkJavaSources = true // default: true. When false, do not check if there are .java files
                             // from which no tests were run.
+    readSourceFiles = true  // default: true. When true, this plugins reads the java files from which
+                            // no tests have been executed, and the files that contain the string
+                            // "@test.not.run=ignore" do not count.
 
     // specify which files do not contain tests (or whose tests are allowed not to run)
     excludes {
@@ -44,6 +47,26 @@ testnotrunerror {
             excludeClassNames = ['com.foo.BarIntTest', 'com.foo.BazIntTest']
         }
     }
+}
+```
+### Using a special comment to declare that a class contains no tests
+
+If your class does not contain tests, you can mention it in `excludeClassNames` in `build.gradle`,
+as shown in the previous section, but there is one more way: you can add a special comment. It must
+contain the text `@test.not.run=ignore`, you may place it in a comment, e.g.:
+```
+package com.example;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * My utilities. Each project must have something like that. Mine too.
+ */
+//@test.not.run=ignore -- let the test-not-run plugin know it's not a test suite
+class MyUtils {
+    boolean groovyTrue(Object o) { ... }
+    ...
 }
 ```
 
