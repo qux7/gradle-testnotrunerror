@@ -7,19 +7,12 @@ import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
 /**
- * A simple unit test for the 'io.github.qux7.testnotrunerror.greeting' plugin.
+ * Unit tests for the 'io.github.qux7.testnotrunerror' plugin.
  */
 public class TestNotRunErrorPluginTest extends Specification {
-//    def "plugin registers task"() {
-//        given:
-//        def project = ProjectBuilder.builder().build()
-//
-//        when:
-//        project.plugins.apply("io.github.qux7.testnotrunerror")
-//
-//        then:
-//        project.tasks.findByName("greeting") != null
-//    }
+    /** Force GStringImpl: Groovy's stripIntent() ignores the length of the last blank line */
+    static String GROOVY_STRING = ""
+
     def "plugin does not register tasks"() {
         given:
         def project0 = ProjectBuilder.builder().build()
@@ -31,6 +24,7 @@ public class TestNotRunErrorPluginTest extends Specification {
         then:
         project.tasks.toSet() == project0.tasks.toSet()
     }
+
     def "plugin creates extension"() {
         given:
         def project = ProjectBuilder.builder().build()
@@ -41,6 +35,7 @@ public class TestNotRunErrorPluginTest extends Specification {
         then:
         project.testnotrunerror instanceof TestNotRunErrorPluginExtension
     }
+
     def "can get class names from classes dir"() {
         given:
         def projectDir = new File("build/unitTest")
@@ -58,15 +53,18 @@ public class TestNotRunErrorPluginTest extends Specification {
         new File(projectDir, "foo/bar/org/grault/Qux.class") << ""
         new File(projectDir, "foo/baar/baz/qux/Baar.class") << ""
         new File(projectDir, "fooo/bar/baz/qux/FooBar.class") << ""
+
         when:
-        def classNames1= TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar'].collect{new File(projectDir, it)})
-        def classNames2= TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar', 'fooo/bar'].collect{new File(projectDir, it)})
-        def classNames3= TestNotRunErrorPlugin.getCompiledClassNames(['foo/baar'].collect{new File(projectDir, it)})
+        def classNames1 = TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar'].collect { new File(projectDir, it) })
+        def classNames2 = TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar', 'fooo/bar'].collect { new File(projectDir, it) })
+        def classNames3 = TestNotRunErrorPlugin.getCompiledClassNames(['foo/baar'].collect { new File(projectDir, it) })
+
         then:
         classNames1 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux'].toSet()
         classNames2 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux', 'baz.qux.FooBar'].toSet()
         classNames3 == ['baz.qux.Baar'].toSet()
     }
+
     def "classes with dollar are ignored"() {
         given:
         def projectDir = new File("build/unitTest")
@@ -92,15 +90,18 @@ public class TestNotRunErrorPluginTest extends Specification {
         new File(projectDir, 'foo/bar/org/grault/Qux$A$B.class') << ""
         new File(projectDir, 'foo/baar/baz/qux/Baar$Q.class') << ""
         new File(projectDir, 'fooo/bar/baz/qux/FooBar$Aa$Bb.class') << ""
+
         when:
-        def classNames1= TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar'].collect{new File(projectDir, it)})
-        def classNames2= TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar', 'fooo/bar'].collect{new File(projectDir, it)})
-        def classNames3= TestNotRunErrorPlugin.getCompiledClassNames(['foo/baar'].collect{new File(projectDir, it)})
+        def classNames1 = TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar'].collect { new File(projectDir, it) })
+        def classNames2 = TestNotRunErrorPlugin.getCompiledClassNames(['foo/bar', 'fooo/bar'].collect { new File(projectDir, it) })
+        def classNames3 = TestNotRunErrorPlugin.getCompiledClassNames(['foo/baar'].collect { new File(projectDir, it) })
+
         then:
         classNames1 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux'].toSet()
         classNames2 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux', 'baz.qux.FooBar'].toSet()
         classNames3 == ['baz.qux.Baar'].toSet()
     }
+
     def "can get class names from java dir"() {
         given:
         def projectDir = new File("build/unitTest")
@@ -118,10 +119,12 @@ public class TestNotRunErrorPluginTest extends Specification {
         new File(projectDir, "foo/bar/org/grault/Qux.java") << ""
         new File(projectDir, "foo/baar/baz/qux/Baar.java") << ""
         new File(projectDir, "fooo/bar/baz/qux/FooBar.java") << ""
+
         when:
-        def classNames1= TestNotRunErrorPlugin.getClassNamesFromSources(['foo/bar'].collect{new File(projectDir, it)})
-        def classNames2= TestNotRunErrorPlugin.getClassNamesFromSources(['foo/bar', 'fooo/bar'].collect{new File(projectDir, it)})
-        def classNames3= TestNotRunErrorPlugin.getClassNamesFromSources(['foo/baar'].collect{new File(projectDir, it)})
+        def classNames1 = TestNotRunErrorPlugin.getClassNamesFromSources(['foo/bar'].collect { new File(projectDir, it) })
+        def classNames2 = TestNotRunErrorPlugin.getClassNamesFromSources(['foo/bar', 'fooo/bar'].collect { new File(projectDir, it) })
+        def classNames3 = TestNotRunErrorPlugin.getClassNamesFromSources(['foo/baar'].collect { new File(projectDir, it) })
+
         then:
         classNames1 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux'].toSet()
         classNames2 == ['baz.qux.Foo', 'baz.qux.Bar', 'org.corge.Baz', 'org.grault.Qux', 'baz.qux.FooBar'].toSet()
@@ -134,7 +137,7 @@ public class TestNotRunErrorPluginTest extends Specification {
         projectDir.deleteDir()
         projectDir.mkdirs()
         new File(projectDir, "src/main/java/foo/bar").mkdirs()
-        new File(projectDir, "src/main/java/foo/bar/Foo.java") << """${''}
+        new File(projectDir, "src/main/java/foo/bar/Foo.java") << """$GROOVY_STRING
             /**
              * this is a test
              */
@@ -144,7 +147,7 @@ public class TestNotRunErrorPluginTest extends Specification {
             class Foo {
             } 
             """.stripIndent()
-        new File(projectDir, "src/main/java/foo/bar/Bar.java") << """${''}
+        new File(projectDir, "src/main/java/foo/bar/Bar.java") << """$GROOVY_STRING
             /**
              * this is a test
              */
@@ -153,7 +156,7 @@ public class TestNotRunErrorPluginTest extends Specification {
             class Bar {
             } 
             """.stripIndent()
-        new File(projectDir, "src/main/java/foo/bar/Baz.java") << """${''}
+        new File(projectDir, "src/main/java/foo/bar/Baz.java") << """$GROOVY_STRING
             /**
              * this is a test
              */
@@ -163,7 +166,7 @@ public class TestNotRunErrorPluginTest extends Specification {
             class Baz {
             } 
             """.stripIndent()
-        new File(projectDir, "src/main/java/foo/bar/Qux.java") << """${''}
+        new File(projectDir, "src/main/java/foo/bar/Qux.java") << """$GROOVY_STRING
             /**
              * this is a test
              */

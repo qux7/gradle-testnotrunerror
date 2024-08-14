@@ -157,7 +157,6 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
             //@test.not.run=ignore
         """.stripIndent()
 
-
         when:
         def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s")
@@ -707,6 +706,10 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
 
 }
 
+/**
+ * Objects of this class appear as a result of {@code prj / "filaname"} or {@code prj % "filename"}.
+ * See the class {@code SourceBaseDir}.
+ */
 class SourceFile {
     File file
     Collection<String> toCommentOut
@@ -718,6 +721,12 @@ class SourceFile {
         this.toCommentOut = toCommentOut
     }
 
+    /**
+     * Write a string to a file. Comment out all of the lines that contain text specified in
+     * any string from the {@code toCommentOut} field.
+     * @param s the string to write
+     * @return this
+     */
     def leftShift(String s) {
         if (fileMustExist) {
             if (!file.exists()) {
@@ -732,9 +741,10 @@ class SourceFile {
             }
         }
         file << commentOut(toCommentOut, s)
+        this
     }
 
-    def commentOut(Collection<String> toCommentOut, String sourceCode) {
+    static def commentOut(Collection<String> toCommentOut, String sourceCode) {
         sourceCode
                 .readLines()
                 .collect({ line ->
@@ -745,7 +755,19 @@ class SourceFile {
                 .join("\n")
     }
 }
-
+/**
+ * A class that implements syntactic sugar like {@code prj / "settings.gradle" << "$pluginManagementBlock"}
+ * and {@code prj % "build.gradle" << "testnotrunerror { enabled = false }"}. An object of this class
+ * represents the root directory of some project, usually called {@code prj}. There are two operations,
+ * {@code /} and {@code %}, {@code prj / "filename"} creates a new file and allows writing to it
+ * with {@code <<}; {@code prj % "filename"} allows writing to an existing file. An exception is thrown
+ * if the file already exists (for {@code /}) or does not exist (for {@code %}).
+ *  <p/>
+ * So {@code prj / "settings.gradle" << "$pluginManagementBlock"} means "create 'settings.gradle' and
+ * write the string that follows {@code <<} to it", and
+ * {@code prj % "build.gradle" << "testnotrunerror { enabled = false }"} means "append the specified
+ * code to the existing 'build.gradle'"
+ */
 class SourceBaseDir {
     File projectDir
     Collection<String> toCommentOut
