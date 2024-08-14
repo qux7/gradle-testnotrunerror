@@ -155,3 +155,28 @@ On the other hand, `stutter` is not perfect either, it cannot test against Gradl
 
 In an ideal world, only one project would be needed.
 
+### I want this plugin to behave a bit differently
+
+Be my guest. Clone the repository, change the source, just do not forget to modify the (id,version) pair.
+The easiest way to use this modified plugin would be to publish it to your local maven repository
+(via `./gradlew publishToMavenLocal`), place the following in `settings.gradle`:
+```
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+```
+and apply the plugin in `build.gradle` via `id` and `version`:
+```courseignore
+plugins {
+    id 'application'
+    //id 'io.github.qux7.testnotrunerror' version '0.1.0'
+    id 'your-id' version 'your-version'
+}
+```
+
+## License
+
+`Apache-2.0` or `MIT`
