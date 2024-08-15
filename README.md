@@ -17,9 +17,6 @@ plugins {
     id 'io.github.qux7.testnotrunerror' version '0.1.0'
 }
 ```
-(This plugin already works, but has not yet been released; you have to `publishToMavenLocal` and use `mavenLocal()`)
-
-TODO: release it
 
 ### Fine-tuning
 ```
@@ -71,6 +68,9 @@ class MyUtils {
 ```
 The plugin check for the string `@test.not.run=ignore` *anywhere* in the file,
 so it does not matter what kind of comment you use, and whether it is a comment.
+
+The plugin reads the source file only if the tests from that file did not run and
+the corresponding class is not on the excludeClassNames list.
 
 ### Command-line overrides
 You can override the boolean configuration parameters on the command line.
