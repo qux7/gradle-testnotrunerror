@@ -3,6 +3,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
     id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '1.2.1'
 }
 
 group 'io.github.qux7'
@@ -15,12 +16,25 @@ repositories {
 dependencies {
     testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
 }
-
+pluginBundle {
+    website = 'https://github.com/qux7/gradle-testnotrunerror'
+    vcsUrl = 'https://github.com/qux7/gradle-testnotrunerror'
+    tags = [
+            'test', 'testing', 'test automation', 'automation',
+            'java',
+            'junit', 'junit-jupiter', 'junit5',
+            'integration testing', 'integrationTesting', 'integration-test',
+            'functional testing', 'functionalTesting', 'functional-test',
+            'unit testing', 'unitTesting', 'unit-test'
+    ]
+}
 gradlePlugin {
     plugins {
         testnotrunerror {
             id = 'io.github.qux7.testnotrunerror'
             implementationClass = 'io.github.qux7.testnotrunerror.TestNotRunErrorPlugin'
+            displayName = "Test Not Run Error Plugin"
+            description = "Detects test configuration errors: build fails if you misconfigure tests and they do not run"
         }
     }
 }
@@ -48,14 +62,7 @@ check {
 java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-//println('=============================')
-//println("rootProject(name, version, group): $rootProject.name $rootProject.version $rootProject.group")
-//println("project(name, version, group): $project.name $project.version $project.group")
-//println "Running gradle version: $gradle.gradleVersion"
-//println "Running gradle version: ${gradle.gradleVersion.getClass()}"
-//println('classPath: '+System.getProperty("java.class.path"))
-//println('=============================')
-//file('.')
+
 publishing {
     publications {
         maven(MavenPublication) {
