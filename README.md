@@ -69,6 +69,10 @@ class MyUtils {
 The plugin check for the string `@test.not.run=ignore` *anywhere* in the file,
 so it does not matter what kind of comment you use, and whether it is a comment.
 
+The recommended way to temporarily deactivate such comment but leave it in the source code
+is to change it to `@test.not.run=-ignore` (you cannot comment it out since it already
+is a comment, and any change will deactivate it, but let's have some standard practice).
+
 The plugin reads the source file only if the tests from that file did not run and
 the corresponding class is not on the excludeClassNames list.
 
