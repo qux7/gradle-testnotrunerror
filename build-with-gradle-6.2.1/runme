@@ -1,0 +1,6 @@
+tail -n $(( `wc -l <$0` - 1 )) $0
+
+./gradlew clean build publishToMavenLocal
+
+#========================================
+
