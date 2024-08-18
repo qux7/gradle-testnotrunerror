@@ -126,6 +126,18 @@ but both `checkJavaSources` and `checkClasses` are set to `false` (so that both 
 then both `checkJavaSources` and `checkClasses` get set to `true` and thus both types of checking get enabled.
 (And if only one method of checking is enabled, the other one remains disabled.)
 
+### Other kinds of overrides
+
+In fact, the command-line overrides set project properties, and there are multiple ways to
+set a project property:
+1. `-Ptestnotrunerror.stopOnFailure=true` on command line
+2. Environment variable `ORG_GRADLE_PROJECT_testnotrunerror.stopOnFailure=false`
+3. Java system property on command line: `-Dorg.gradle.project.testnotrunerror.stopOnFailure=false`
+4. `testnotrunerror.stopOnFailure=false` on a separate line in `gradle.properties` in the project root directory
+5. In theory, it is also possible to set project properties in the `gradle.properties` file in the Gradle user
+   home directory, `~/.gradle/gradle.properties`, but this file is for stuff like database passwords; in the
+   case of the `testnotrunerror` plugin, it's just not meaningful to use this method.
+
 ## About this repository
 
 ### Linux symbolic links and Git

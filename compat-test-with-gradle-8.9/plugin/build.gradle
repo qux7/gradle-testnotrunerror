@@ -81,6 +81,8 @@ dependencies {
 //    compatTestRuntimeOnly files('../../build-with-gradle-6.2.1/build/libs/testnotrunerror-0.1.0.jar')
     compatTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 // }} !!stutter
+    // need org.junit.Assume in Spock tests
+    compatTestImplementation 'junit:junit:4.12'
 }
 
 gradlePlugin {

@@ -1,6 +1,9 @@
 package io.github.qux7.testnotrunerror
 
 import org.gradle.api.GradleException
+import org.gradle.util.GradleVersion
+import org.junit.Assume
+import spock.lang.Requires
 import spock.lang.Specification
 import org.gradle.testkit.runner.GradleRunner
 
@@ -187,6 +190,91 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         when:
         def result = createMyGradleRunner(projectDir)
                 .withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=false")
+                .build()
+
+        then:
+        result.output.contains("running unitTestApp()")
+        result.output.contains("running unitTestFoo()")
+        !result.output.contains("running unitTestBar()")
+        result.output.contains("[test] Total tests run: 2")
+        result.output.contains("[test] $classCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $javaSourceCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $stopOnFailureDisabled")
+
+        !result.output.contains("running integrationTestApp()")
+        !result.output.contains("running integrationTestFoo()")
+        !result.output.contains("running integrationTestBar()")
+        !result.output.contains("[integrationTest] Total tests run:")
+        !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
+        !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+    }
+
+    def "detects missing unit test but environment variable override prevents task failure"() {
+        given:
+        Assume.assumeTrue(GradleVersion.current() >= GradleVersion.version('5.2'))
+        def prj = createProjectWithout(['//unitTestBar'])
+        def projectDir = prj.projectDir
+
+        when:
+        def result = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s")
+                .withEnvironment(['ORG_GRADLE_PROJECT_testnotrunerror.stopOnFailure':'false'])
+                .build()
+
+        then:
+        result.output.contains("running unitTestApp()")
+        result.output.contains("running unitTestFoo()")
+        !result.output.contains("running unitTestBar()")
+        result.output.contains("[test] Total tests run: 2")
+        result.output.contains("[test] $classCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $javaSourceCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $stopOnFailureDisabled")
+
+        !result.output.contains("running integrationTestApp()")
+        !result.output.contains("running integrationTestFoo()")
+        !result.output.contains("running integrationTestBar()")
+        !result.output.contains("[integrationTest] Total tests run:")
+        !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
+        !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+    }
+
+    def "detects missing unit test but system property override prevents task failure"() {
+        given:
+        def prj = createProjectWithout(['//unitTestBar'])
+        def projectDir = prj.projectDir
+
+        when:
+        def result = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s", "-Dorg.gradle.project.testnotrunerror.stopOnFailure=false")
+                .build()
+
+        then:
+        result.output.contains("running unitTestApp()")
+        result.output.contains("running unitTestFoo()")
+        !result.output.contains("running unitTestBar()")
+        result.output.contains("[test] Total tests run: 2")
+        result.output.contains("[test] $classCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $javaSourceCheckErrorMessagePrefix [ftest.BarTest]")
+        result.output.contains("[test] $stopOnFailureDisabled")
+
+        !result.output.contains("running integrationTestApp()")
+        !result.output.contains("running integrationTestFoo()")
+        !result.output.contains("running integrationTestBar()")
+        !result.output.contains("[integrationTest] Total tests run:")
+        !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
+        !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+    }
+
+    def "detects missing unit test but gradle.properties override prevents task failure"() {
+        given:
+        def prj = createProjectWithout(['//unitTestBar'])
+        def projectDir = prj.projectDir
+        prj / "gradle.properties" << """$GROOVY_STRING
+            testnotrunerror.stopOnFailure=false
+        """.stripIndent()
+        when:
+        def result = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s")
                 .build()
 
         then:
@@ -500,7 +588,6 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         runner
     }
 
-
     /**
      * Create a test project, commenting out the specified lines.
      * The project's directory is deleted and created again, then project's files are created.
@@ -755,6 +842,7 @@ class SourceFile {
                 .join("\n")
     }
 }
+
 /**
  * A class that implements syntactic sugar like {@code prj / "settings.gradle" << "$pluginManagementBlock"}
  * and {@code prj % "build.gradle" << "testnotrunerror { enabled = false }"}. An object of this class
