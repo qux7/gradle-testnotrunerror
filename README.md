@@ -14,7 +14,7 @@ This plugin makes Gradle complain if at least some of your tests do not run.
 ### Basic usage
 ```
 plugins {
-    id 'io.github.qux7.testnotrunerror' version '0.1.0'
+    id 'io.github.qux7.testnotrunerror' version '0.1.1'
 }
 ```
 
