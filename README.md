@@ -137,6 +137,9 @@ set a project property:
 5. In theory, it is also possible to set project properties in the `gradle.properties` file in the Gradle user
    home directory, `~/.gradle/gradle.properties`, but this file is for stuff like database passwords; in the
    case of the `testnotrunerror` plugin, it's just not meaningful to use this method.
+6. Combinations and/or variations  of the above methods are possible, e.g. Java system properties may be set
+   in `gradle.properties`, so that the following long construction on a separate line in `gradle.properties` also
+   works: `systemProp.org.gradle.project.testnotrunerror.stopOnFailure=false`
 
 ## About this repository
 
@@ -185,7 +188,7 @@ pluginManagement {
 }
 ```
 and apply the plugin in `build.gradle` via `id` and `version`:
-```courseignore
+```
 plugins {
     id 'application'
     //id 'io.github.qux7.testnotrunerror' version '0.1.0'

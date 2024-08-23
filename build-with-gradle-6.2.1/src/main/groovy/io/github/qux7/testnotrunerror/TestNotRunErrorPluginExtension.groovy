@@ -22,7 +22,7 @@ class TestNotRunErrorPluginExtension {
                 '}';
     }
 
-    def setFromCommandLineProperties(Project theProject) {
+    def setFromProjectProperties(Project theProject) {
         def projectProperties = theProject.properties
         def wasMnemonic = setMnemonicFromMap(projectProperties) { key, value ->
             println("ignoring '-P$key=$value': expected 'error', 'warning' or 'ignore'")

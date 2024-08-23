@@ -194,4 +194,17 @@ public class TestNotRunErrorPluginTest extends Specification {
         expect:
         'foo/bar/Baz.java' == TestNotRunErrorPlugin.classNameToFileName('foo.bar.Baz', '.java')
     }
+
+    def "check that hard-coded html link to docs is valid"() {
+        given:
+        // read the docs file
+        def readme = new File("../README.md").text
+        // restore the section title
+        def anchor = TestNotRunErrorPlugin.propertiesDocsUrl.split('#')[1]
+        def title = anchor.replaceAll('-', ' ')
+
+        expect:
+        // containsIgnoreCase() requires Groovy 3
+        readme.toLowerCase().contains('# ' + title) // the section title must be there in the docs file, otherwise the link is broken
+    }
 }

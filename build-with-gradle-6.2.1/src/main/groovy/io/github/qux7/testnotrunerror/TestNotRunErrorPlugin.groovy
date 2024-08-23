@@ -24,7 +24,8 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
     static String stopOnFailureDisabled = "no error because `testnotrunerror { stopOnFailure = false }` was specified"
     static String applyMessage = "APPLYING TestNotRunErrorPlugin: REPORT TESTS THAT WERE NOT RUN DUE TO A DEPENDENCY/CONFIGURATION ERROR"
     static String whenFailure_Message = "To treat errors as warnings, use 'testnotrunerror { stopOnFailure=false }' in the build script, or '-Ptestnotrunerror.stopOnFailure=false' on the command line"
-    static String disabledOnCmdlMessage = "TestNotRunErrorPlugin was disabled with -Ptestnotrunerror.enabled=false on the command line";
+    static String propertiesDocsUrl = "https://github.com/qux7/gradle-testnotrunerror#other-kinds-of-overrides"
+    static String disabledInPrjPropMessage = "TestNotRunErrorPlugin was disabled via project properties, there are multiple ways to do that, see " + propertiesDocsUrl
     static String disabledInCfgMessage = "TestNotRunErrorPlugin was disabled with 'testnotrunerror { enabled = false }'";
     static String useWarningInstead_Message = "Use 'stopOnFailure=false' instead of 'enabled=false' to see error messages as warnings"
 
@@ -43,10 +44,10 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
             doFirst {
                 println("doFirst0 "+extension)
                 boolean wasEnabled = extension.enabled
-                extension.setFromCommandLineProperties(project)
+                extension.setFromProjectProperties(project)
                 println("doFirst1 "+extension)
                 if (!extension.enabled) {
-                    println(wasEnabled ? disabledInCfgMessage : disabledOnCmdlMessage)
+                    println(wasEnabled ? disabledInCfgMessage : disabledInPrjPropMessage)
                     println(useWarningInstead_Message)
                 }
             }
