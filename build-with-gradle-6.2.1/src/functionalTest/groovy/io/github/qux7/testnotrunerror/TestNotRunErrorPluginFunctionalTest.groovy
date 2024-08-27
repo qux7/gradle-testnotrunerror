@@ -18,6 +18,8 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
     static String testFilterDetected = "no error because --tests was specified on the command line"
     static String stopOnFailureDisabled = "no error because `testnotrunerror { stopOnFailure = false }` was specified"
     static String THIS_BUILD_FAILURE_IS_OK = "^^^^^ ^^^^^^ THIS BUILD WAS EXPECTED TO FAIL"
+    static String extensionBeforeOverrides = "TestNotRunErrorPlugin extension before applying properties: "
+    static String extensionAfterOverrides = "TestNotRunErrorPlugin extension after applying properties: "
     /** Force GStringImpl: Groovy's stripIntent() ignores the length of the last blank line */
     static String GROOVY_STRING = ""
 
@@ -45,6 +47,10 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
 
+        and:
+        !result.output.contains(extensionBeforeOverrides)
+        !result.output.contains(extensionAfterOverrides)
+
         when:
         def result2 = createMyGradleRunner(projectDir)
                 .withArguments("test")
@@ -65,6 +71,18 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         !result2.output.contains("[integrationTest] Total tests run: 3")
         !result2.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
         !result2.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+    }
+
+    def "can run project with info logging"() {
+        given:
+        def projectDir = createProjectWithout([]).projectDir
+        when:
+        def result = createMyGradleRunner(projectDir)
+                .withArguments("test", "-i")
+                .build()
+        then:
+        result.output.contains(extensionBeforeOverrides)
+        result.output.contains(extensionAfterOverrides)
     }
 
     def "test project runs ok with --tests"() {
@@ -120,7 +138,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
 
-    def "detects missing unit test but stopOnFailure = false prevents task failure"() {
+    def "detects missing unit test but stopOnFailure = false in build.gradle prevents task failure"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
         def projectDir = prj.projectDir
@@ -200,6 +218,36 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         result.output.contains("[test] $classCheckErrorMessagePrefix [ftest.BarTest]")
         result.output.contains("[test] $javaSourceCheckErrorMessagePrefix [ftest.BarTest]")
         result.output.contains("[test] $stopOnFailureDisabled")
+
+        !result.output.contains("running integrationTestApp()")
+        !result.output.contains("running integrationTestFoo()")
+        !result.output.contains("running integrationTestBar()")
+        !result.output.contains("[integrationTest] Total tests run:")
+        !result.output.contains("[integrationTest] $classCheckErrorMessagePrefix")
+        !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
+    }
+
+    def "ignores incorrect property values"() {
+        given:
+        def prj = createProjectWithout([])
+        def projectDir = prj.projectDir
+
+        when:
+        def result = createMyGradleRunner(projectDir)
+                .withArguments("clean", "test", "-s", "-Ptestnotrunerror.stopOnFailure=ignore", "-Ptest.not.run=false")
+                .build()
+
+        then:
+        result.output.contains("ignoring property assignment testnotrunerror.stopOnFailure=ignore: expected 'true' or 'false'")
+        result.output.contains("ignoring property assignment test.not.run=false: expected 'error', 'warning' or 'ignore'")
+
+        result.output.contains("running unitTestApp()")
+        result.output.contains("running unitTestFoo()")
+        result.output.contains("running unitTestBar()")
+        result.output.contains("[test] Total tests run: 3")
+        !result.output.contains("[test] $classCheckErrorMessagePrefix")
+        !result.output.contains("[test] $javaSourceCheckErrorMessagePrefix")
+        !result.output.contains("[test] $stopOnFailureDisabled")
 
         !result.output.contains("running integrationTestApp()")
         !result.output.contains("running integrationTestFoo()")

@@ -1,7 +1,9 @@
 package io.github.qux7.testnotrunerror
 
+import groovy.transform.ToString
 import org.gradle.api.Project
 
+@ToString(includeNames = true, includePackage = false)
 class TestNotRunErrorPluginExtension {
     boolean stopOnFailure = true
     boolean checkClasses = true
@@ -11,24 +13,13 @@ class TestNotRunErrorPluginExtension {
 
     static final List booleanFields = ['stopOnFailure', 'checkClasses', 'checkJavaSources', 'readSourceFiles', 'enabled'].asImmutable()
 
-    @Override
-    public String toString() {
-        return "TestNotRunErrorPluginExtension{" +
-                "stopOnFailure=" + stopOnFailure +
-                ", checkClasses=" + checkClasses +
-                ", checkJavaSources=" + checkJavaSources +
-                ", readSourceFiles=" + readSourceFiles +
-                ", enabled=" + enabled +
-                '}';
-    }
-
     def setFromProjectProperties(Project theProject) {
         def projectProperties = theProject.properties
         def wasMnemonic = setMnemonicFromMap(projectProperties) { key, value ->
-            println("ignoring '-P$key=$value': expected 'error', 'warning' or 'ignore'")
+            System.err.println("ignoring property assignment $key=$value: expected 'error', 'warning' or 'ignore'")
         }
         setFieldsFromMap(projectProperties) { key, value ->
-            println("ignoring '-P$key=$value': expected 'true' or 'false'")
+            println("ignoring property assignment $key=$value: expected 'true' or 'false'")
         }
         if (wasMnemonic && enabled && !checkJavaSources && !checkClasses) {
             println("WARNING: both checkJavaSources and checkClasses were disabled, setting them both to true")

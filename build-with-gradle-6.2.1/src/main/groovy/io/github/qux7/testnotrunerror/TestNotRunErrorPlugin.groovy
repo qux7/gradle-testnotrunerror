@@ -28,6 +28,8 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
     static String disabledInPrjPropMessage = "TestNotRunErrorPlugin was disabled via project properties, there are multiple ways to do that, see " + propertiesDocsUrl
     static String disabledInCfgMessage = "TestNotRunErrorPlugin was disabled with 'testnotrunerror { enabled = false }'";
     static String useWarningInstead_Message = "Use 'stopOnFailure=false' instead of 'enabled=false' to see error messages as warnings"
+    static String extensionBeforeOverrides = "TestNotRunErrorPlugin extension before applying properties: "
+    static String extensionAfterOverrides = "TestNotRunErrorPlugin extension after applying properties: "
 
     public void apply(Project project) {
         println(applyMessage)
@@ -41,16 +43,18 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
             def testCount = new AtomicInteger();
             def exceptionMessage1 = ""
             def exceptionMessage2 = ""
+
             doFirst {
-                println("doFirst0 "+extension)
+                project.logger.info(extensionBeforeOverrides + extension)
                 boolean wasEnabled = extension.enabled
                 extension.setFromProjectProperties(project)
-                println("doFirst1 "+extension)
+                project.logger.info(extensionAfterOverrides + extension)
                 if (!extension.enabled) {
                     println(wasEnabled ? disabledInCfgMessage : disabledInPrjPropMessage)
                     println(useWarningInstead_Message)
                 }
             }
+
             afterTest { desc, res ->
                 if (extension.enabled) {
                     runTestSet.add(desc.className);
@@ -86,12 +90,12 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
                     }
                     if (diffClasses) {
                         String msg = "[$name] $classCheckErrorMessagePrefix ${new TreeSet<>(diffClasses)}"
-                        println(msg)
+                        project.logger.error(msg)
                         exceptionMessage1 = msg
                     }
                     if (diffJava) {
                         String msg = "[$name] $javaSourceCheckErrorMessagePrefix ${new TreeSet<>(diffJava)}"
-                        println(msg)
+                        project.logger.error(msg)
                         exceptionMessage2 = msg
                     }
                 }
@@ -101,11 +105,11 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
                 if (extension.enabled) {
                     if (exceptionMessage1 || exceptionMessage2) {
                         if (filter.commandLineIncludePatterns) {
-                            println("[$name] $testFilterDetected")
+                            project.logger.error("[$name] $testFilterDetected")
                         } else if (!extension.stopOnFailure) {
-                            println("[$name] $stopOnFailureDisabled")
+                            project.logger.error("[$name] $stopOnFailureDisabled")
                         } else {
-                            println("[$name] $whenFailure_Message")
+                            project.logger.error("[$name] $whenFailure_Message")
                             throw new GradleException([exceptionMessage1, exceptionMessage2].findAll().join("; "))
                         }
                     }

@@ -88,6 +88,35 @@ class TestNotRunErrorPluginExtensionTest extends Specification {
 
     }
 
+    def "test toString"() {
+        when:
+        def e = new TestNotRunErrorPluginExtension()
+        def eToString = e.toString()
+
+        then:
+        eToString == "TestNotRunErrorPluginExtension(stopOnFailure:true, checkClasses:true, checkJavaSources:true, readSourceFiles:true, enabled:true)"
+    }
+
+    def "toString must include all booleanFields"() {
+        when:
+        def e = new TestNotRunErrorPluginExtension()
+        def eToString = e.toString()
+
+        then:
+        TestNotRunErrorPluginExtension.booleanFields.every { eToString.contains(it) }
+    }
+
+    def "booleanFields must include all fields from generated toString"() {
+        when:
+        def e = new TestNotRunErrorPluginExtension()
+        def s = e.toString()
+        TestNotRunErrorPluginExtension.booleanFields.each { s -= it + ':true' }
+        TestNotRunErrorPluginExtension.booleanFields.drop(2).each { s -= ', ' } // leave exactly one ', '
+
+        then:
+        s == 'TestNotRunErrorPluginExtension(, )'
+    }
+
     TestNotRunErrorPluginExtension newTestNotRunErrorPluginExtension(boolean init) {
         new TestNotRunErrorPluginExtension(stopOnFailure: init, checkClasses: init, checkJavaSources: init, readSourceFiles: init, enabled: init)
     }
