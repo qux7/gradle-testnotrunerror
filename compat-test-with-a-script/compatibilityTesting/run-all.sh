@@ -55,5 +55,5 @@ for f in *; do
         fi
     fi
 done
-
+(exit $rc)
 
