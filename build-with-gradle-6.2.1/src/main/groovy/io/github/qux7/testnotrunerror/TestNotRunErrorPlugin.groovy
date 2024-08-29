@@ -10,6 +10,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.tasks.testing.Test
 import org.gradle.util.GradleVersion
 
+import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
@@ -180,11 +181,9 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
      * @return true if the file contains the string "@test.not.run=ignore"
      */
     static boolean isMarkedForIgnoring(File f) {
-        // instead of reading the whole potentially huge file at once, we read it via BufferedReader
-        // that filterLine() uses. The bad news is that we still read the whole file.
-        def myBuffer = new CharArrayWriter()
-        f.filterLine { it.contains("@test.not.run=ignore") }.writeTo(myBuffer)
-        myBuffer.toString()
+        Files.lines(f.toPath()).withCloseable {
+            it.filter { it.contains("@test.not.run=ignore") }.findFirst()
+        }
     }
 
     /**

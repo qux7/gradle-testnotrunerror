@@ -176,18 +176,28 @@ public class TestNotRunErrorPluginTest extends Specification {
             class Qux {
             } 
             """.stripIndent()
+        new File(projectDir, "src/main/java/foo/bar/Corge.java") << """$GROOVY_STRING
+            /**
+             * this is a test
+             */
+            package foo.bar;
 
+            class Corge {
+            }
+            //@test.not.run=ignore""".stripIndent()
         when:
         def isFooMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Foo.java"))
         def isBarMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Bar.java"))
         def isBazMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Baz.java"))
         def isQuxMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Qux.java"))
+        def isCorgeMarked = TestNotRunErrorPlugin.isMarkedForIgnoring(new File(projectDir, "src/main/java/foo/bar/Corge.java"))
 
         then:
         isFooMarked
         !isBarMarked
         !isBazMarked
         isQuxMarked
+        isCorgeMarked
     }
 
     def "test classNameToFileName"() {
