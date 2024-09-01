@@ -56,6 +56,9 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
                 }
             }
 
+            // It is not documented whether afterTest blocks may be invoked at the same moment on different threads.
+            // In at least some frameworks this does not happen in practice. OTOH, afterSuite blocks do get invoked
+            // on different threads.
             afterTest { desc, res ->
                 if (extension.enabled) {
                     runTestSet.add(desc.className);

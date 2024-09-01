@@ -6,6 +6,8 @@
  * user guide available at https://docs.gradle.org/5.0/userguide/tutorial_groovy_projects.html
  */
 
+// Gradle version: 5.0; Groovy version: 2.5.4
+
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     id 'java-gradle-plugin'

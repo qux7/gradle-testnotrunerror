@@ -286,7 +286,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
 
-    def "detects missing unit test but system property override prevents task failure"() {
+    def "detects missing unit test but system property override on command line prevents task failure"() {
         given:
         def prj = createProjectWithout(['//unitTestBar'])
         def projectDir = prj.projectDir
@@ -532,7 +532,7 @@ class TestNotRunErrorPluginFunctionalTest extends Specification implements Plugi
         !result.output.contains("[integrationTest] $javaSourceCheckErrorMessagePrefix")
     }
 
-    def "ignores missing unit test but not integration test"() {
+    def "ignores missing unit test but not integration test with the same name"() {
         given:
         def prj = createProjectWithout(['//unitTestFoo', '//integrationTestFoo'])
         prj % "build.gradle" << """$GROOVY_STRING

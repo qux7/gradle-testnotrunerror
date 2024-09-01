@@ -5,6 +5,8 @@
  * For more details on writing Custom Plugins, please refer to https://docs.gradle.org/8.10/userguide/custom_plugins.html in the Gradle documentation.
  */
 
+// Gradle version: 8.10; Groovy version: 3.0.22
+
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     id 'java-gradle-plugin'

@@ -6,6 +6,8 @@
  * User Manual available at https://docs.gradle.org/8.0/userguide/custom_plugins.html
  */
 
+// Gradle version: 8.0; Groovy version: 3.0.13
+
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     id 'java-gradle-plugin'
