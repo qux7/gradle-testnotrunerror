@@ -6,4 +6,14 @@
  */
 
 rootProject.name = 'usestutter'
-include('plugin')
+
+
+// Almost identical subprojects applying, in parallel, the same test harness to different versions of Java and Gradle.
+include('plugin1')
+include('plugin2')
+include('plugin3')
+include('plugin4')
+
+// In these subprojects, only the files 'stutter-matrices.gradle' are different, the rest is the same,
+// and even more, symlinked to the corresponding files in 'plugin1/'.
+

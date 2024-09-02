@@ -34,42 +34,7 @@ java {
 // }} !!stutter
 
 
-// !!stutter {{
-// for a real modern example, see stutter { ... } in https://github.com/ajoberstar/gradle-stutter/blob/main/build.gradle.kts
-stutter {
-  // if true, only match min/max within that otherwise matches your compatibility specs in each Gradle major version
-  sparse = false // defaults to true
-
-  matrices {
-    java11 {
-      javaToolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-      }
-      gradleVersions {
-        compatibleRange '5.0'
-      }
-    }
-    java17 {
-      javaToolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-      }
-      gradleVersions {
-        compatibleRange '7.2'
-      }
-    }
-    java21 {
-      javaToolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-      }
-      gradleVersions {
-        compatibleRange '8.3'
-      }
-    }
-
-  }
-}
-// }} !!stutter
-
+apply from: 'stutter-matrices.gradle'
 
 dependencies {
     // Use the awesome Spock testing and specification framework
@@ -136,6 +101,10 @@ tasks.withType(Test) {
     afterSuite {desc, res -> println("after suite [$desc.name] $desc.className: $res")}
 }
 // }} show running tests
+
+tasks.withType(Test).configureEach {
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}
 
 tasks.named('check') {
     dependsOn 'compatTest'
