@@ -14,7 +14,7 @@ This plugin makes Gradle complain if at least some of your tests do not run.
 ### Basic usage
 ```
 plugins {
-    id 'io.github.qux7.testnotrunerror' version '0.1.1'
+    id 'io.github.qux7.testnotrunerror' version '0.1.2'
 }
 ```
 
@@ -164,6 +164,9 @@ But to test the plugin for compatibility with various Gradle versions, I use the
 of the `stutter` plugin, that requires the latest Gradle.
 
 So we have two subdirectories, `build-with-gradle-6.2.1/` and `compat-test-with-gradle-8.9/`.
+
+As to `compat-test-with-gradle-8.9/`, there are 4 subprojects, their purpose is to run the
+compatibility test harness in parallel.
 
 The 3rd subdirectory, `compat-test-with-a-script/`, does compatibility testing without any plugin.
 It sort of does what `stutter` is for, but does not require one version of Gradle to run another Gradle,
