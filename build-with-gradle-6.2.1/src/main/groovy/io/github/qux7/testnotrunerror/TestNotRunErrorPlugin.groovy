@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
+import java.util.stream.Stream
 
 /**
  * Gradle plugin: report tests that were not run.
@@ -184,9 +185,18 @@ public class TestNotRunErrorPlugin implements Plugin<Project> {
      * @return true if the file contains the string "@test.not.run=ignore"
      */
     static boolean isMarkedForIgnoring(File f) {
-        Files.lines(f.toPath()).withCloseable {
-            it.filter { it.contains("@test.not.run=ignore") }.findFirst()
+        linesFromFile(f).withCloseable {
+            it.anyMatch { it.contains("@test.not.run=ignore") }
         }
+    }
+
+    /**
+     * Given a file, return a stream of its lines.
+     * @param f file
+     * @return stream of lines
+     */
+    static Stream<String> linesFromFile(File f) {
+        Files.lines(f.toPath())
     }
 
     /**

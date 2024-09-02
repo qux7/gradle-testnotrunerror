@@ -6,6 +6,9 @@ package io.github.qux7.testnotrunerror
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
+import java.nio.file.Files
+import java.util.concurrent.atomic.AtomicInteger
+
 /**
  * Unit tests for the 'io.github.qux7.testnotrunerror' plugin.
  */
@@ -198,6 +201,56 @@ public class TestNotRunErrorPluginTest extends Specification {
         !isBazMarked
         isQuxMarked
         isCorgeMarked
+    }
+
+    def "a source file is read only up to the first occurrence of @test.not.run=ignore"() {
+        given:
+        def projectDir = new File("build/unitTest")
+        projectDir.deleteDir()
+        projectDir.mkdirs()
+        new File(projectDir, "src/main/java/foo/bar").mkdirs()
+
+        def sourceCode = """$GROOVY_STRING
+            /**
+             * this is a test
+             */
+            package foo.bar;
+
+            // ------------------------------------------------
+            // ------------------------------------------------
+            // ------------------------------------------------
+            // ------------------------------------------------
+            // ------------------------------------------------
+            // ------------------------------------------------
+
+            //@test.not.run=ignore
+            class Foo {
+                // ================================================
+                // ================================================
+                // ================================================
+                // ================================================
+                // ================================================
+                // ================================================
+            }
+        """.stripIndent()
+        new File(projectDir, "src/main/java/foo/bar/Foo.java") << sourceCode
+
+        when:
+        def lineCount = new AtomicInteger();
+        def origFile = new File(projectDir, "src/main/java/foo/bar/Foo.java")
+        def spyStream = TestNotRunErrorPlugin.linesFromFile(origFile).peek {
+            lineCount.incrementAndGet()
+        }
+
+        GroovySpy(TestNotRunErrorPlugin, global: true)
+        TestNotRunErrorPlugin.linesFromFile(origFile) >> spyStream
+
+        def res = TestNotRunErrorPlugin.isMarkedForIgnoring(origFile)
+
+        then:
+        res
+        lineCount.get() == 14
+        sourceCode.lines().count() == 22
     }
 
     def "test classNameToFileName"() {
